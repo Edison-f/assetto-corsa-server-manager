@@ -6,6 +6,7 @@ mod deserialization;
 mod defaults;
 mod display_settings;
 mod display_tracks;
+mod display_cars;
 
 use std::io::Write;
 // hide console window on Windows in release
@@ -22,7 +23,7 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
     eframe::run_native(
-        "My egui App",
+        "Server Manager",
         options,
         Box::new(|cc| {
             // This gives us image support:
@@ -162,10 +163,8 @@ struct Car {
 
 #[derive(PartialEq)]
 struct ServerManager {
-    name: String,
-    age: u32,
     assetto_corsa_path: Option<String>,
-    picked: bool,
+    is_path_selected: bool,
     config: MasterConfig,
     entry_list: Option<EntryList>,
     expand_all: bool,
@@ -177,9 +176,13 @@ struct ServerManager {
     expand_data: bool,
     expand: bool,
     discovered_tracks: bool,
-    track_list: Vec<Vec<String>>,
     display_track_images: bool,
+    track_list: Vec<Vec<String>>,
     track_textures: Vec<Vec<TextureHandle>>,
+    discovered_cars: bool,
+    display_car_images: bool,
+    car_list: Vec<String>,
+    car_textures: Vec<Vec<TextureHandle>>,
 }
 
 impl ServerManager {
@@ -205,7 +208,7 @@ impl eframe::App for ServerManager {
                     if ui.button("Select 'assetto_corsa' Folder…").clicked() {
                         if let Some(path) = rfd::FileDialog::new().pick_folder() {
                             self.assetto_corsa_path = Some(path.display().to_string());
-                            self.picked = true;
+                            self.is_path_selected = true;
                         }
                     }
                     ui.text_edit_singleline(&mut self.config.server.name);
@@ -215,9 +218,9 @@ impl eframe::App for ServerManager {
                         ui.monospace(picked_path);
                         // });
                         ui.checkbox(&mut self.display_track_images, "Display Track Images (SLOW)");
-                        if self.picked && ui.button("Load Config").clicked() {
+                        if self.is_path_selected && ui.button("Load Config").clicked() {
                             self.parse();
-                            self.picked = false;
+                            self.is_path_selected = false;
                         }
                         let save_to_file = ui.button("Save to file");
                         if save_to_file.clicked() {

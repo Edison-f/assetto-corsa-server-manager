@@ -3,10 +3,8 @@ use crate::{DataConfig, DynamicTrackConfig, FTPConfig, MasterConfig, ServerManag
 impl Default for ServerManager {
     fn default() -> Self {
         Self {
-            name: "Arthur".to_owned(),
-            age: 42,
             assetto_corsa_path: None,
-            picked: false,
+            is_path_selected: false,
             config: MasterConfig::default(),
             entry_list: None,
             expand_all: false,
@@ -18,9 +16,13 @@ impl Default for ServerManager {
             expand_data: false,
             expand: false,
             discovered_tracks: false,
-            track_list: vec![],
             display_track_images: false,
+            track_list: vec![],
             track_textures: vec![],
+            discovered_cars: false,
+            display_car_images: false,
+            car_list: vec![],
+            car_textures: vec![],
         }
     }
 }

@@ -18,8 +18,6 @@ use crate::ServerManager;
 
 impl ServerManager {
     pub(crate) fn display_tracks(&mut self, ui: &mut egui::Ui) {
-        // ui.menu_image_button();
-        let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\tracks";
         if !self.discovered_tracks {
             self.track_list = self.discover_tracks();
             for track in &self.track_list {
