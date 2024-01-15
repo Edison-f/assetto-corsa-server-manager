@@ -11,7 +11,7 @@ use std::io::Write;
 // hide console window on Windows in release
 use egui_extras;
 use eframe::egui;
-use egui::{Image, TextureHandle};
+use egui::TextureHandle;
 use regex::Regex;
 use serde::{Deserialize};
 
@@ -178,6 +178,7 @@ struct ServerManager {
     expand: bool,
     discovered_tracks: bool,
     track_list: Vec<Vec<String>>,
+    display_track_images: bool,
     track_textures: Vec<Vec<TextureHandle>>,
 }
 
@@ -192,49 +193,51 @@ impl ServerManager {
         self.convert(split_config);
         println!("{}", serde_ini::to_string(&self.config).unwrap());
     }
-
 }
 
 impl eframe::App for ServerManager {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("My egui Application");
-
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                if ui.button("Select Folder…").clicked() {
-                    if let Some(path) = rfd::FileDialog::new().pick_folder() {
-                        self.assetto_corsa_path = Some(path.display().to_string());
-                        self.picked = true;
+            ui.heading("AC Alt Server Manager");
+            ui.columns(3, |ui| {
+                // Config Editing
+                egui::ScrollArea::vertical().show(&mut ui[0], |ui| {
+                    if ui.button("Select 'assetto_corsa' Folder…").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().pick_folder() {
+                            self.assetto_corsa_path = Some(path.display().to_string());
+                            self.picked = true;
+                        }
                     }
-                }
-                ui.text_edit_singleline(&mut self.config.server.name);
-                if let Some(picked_path) = &self.assetto_corsa_path {
-                    ui.horizontal(|ui| {
+                    ui.text_edit_singleline(&mut self.config.server.name);
+                    if let Some(picked_path) = &self.assetto_corsa_path {
+                        // ui.horizontal(|ui| {
                         ui.label("Selected Folder Path:");
                         ui.monospace(picked_path);
-                    });
-
-                    self.display_tracks(ui);
-                    // let inner = std::fs::read_dir(picked_path).unwrap();
-                    if self.picked && ui.button("Load Config").clicked() {
-                        // for contents in inner {
-                        //     println!("{:?}", contents.unwrap().file_name())
-                        // }
-                        self.parse();
-                        self.picked = false;
+                        // });
+                        ui.checkbox(&mut self.display_track_images, "Display Track Images (SLOW)");
+                        if self.picked && ui.button("Load Config").clicked() {
+                            self.parse();
+                            self.picked = false;
+                        }
+                        let save_to_file = ui.button("Save to file");
+                        if save_to_file.clicked() {
+                            let mut file = std::fs::File::create(format!("{}server\\cfg\\temp_server_cfg.ini", self.assetto_corsa_path.clone().unwrap())).unwrap();
+                            file.write_all(serde_ini::to_string(&self.config).unwrap().as_bytes()).expect("Serialization Error");
+                        }
                     }
-                    let save_to_file = ui.button("Save to file");
-                    if save_to_file.clicked() {
-                        let mut file = std::fs::File::create(format!("{}server\\cfg\\temp_server_cfg.ini", self.assetto_corsa_path.clone().unwrap())).unwrap();
-                        file.write_all(serde_ini::to_string(&self.config).unwrap().as_bytes()).expect("Serialization Error");
+                    let print_config = ui.button("Print config");
+                    if print_config.clicked() {
+                        println!("{}", serde_ini::to_string(&self.config).unwrap());
                     }
-                }
-                let print_config = ui.button("Print config");
-                if print_config.clicked() {
-                    println!("{}", serde_ini::to_string(&self.config).unwrap());
-                }
 
-                ServerManager::display(self, ui);
+                    ServerManager::display(self, ui);
+                });
+                // Track Selection
+                egui::ScrollArea::both().id_source("col2").show(&mut ui[1], |ui| {
+                    if self.display_track_images {
+                        self.display_tracks(ui);
+                    }
+                });
             });
         });
     }

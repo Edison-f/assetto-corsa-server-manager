@@ -1,6 +1,6 @@
 use eframe::emath::Vec2;
 use eframe::epaint::ColorImage;
-use egui::Image;
+use egui::{Image, Widget};
 use crate::ServerManager;
 
 /**
@@ -20,79 +20,19 @@ impl ServerManager {
     pub(crate) fn display_tracks(&mut self, ui: &mut egui::Ui) {
         // ui.menu_image_button();
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\tracks";
-        // let track_path = path.clone() + "kanazawa\\ui\\layout_circuit\\preview.png";
-        // let image = image::load_from_memory(&*std::fs::read(track_path).unwrap()).unwrap();
-        // let size = [image.width() as usize, image.height() as usize];
-        // let image_buffer = image.to_rgba8();
-        // let pixels = image_buffer.into_vec();
-        // let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-        // let texture = ui.ctx().load_texture("track", image, Default::default());
-        // let image = Image::from_texture(&texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-        // let resize = egui::containers::Resize::min_width(Default::default(), 0.0).min_height(0.0);
-        // resize.show(ui, |ui| {
-        // ui.add(image);
-        // });
         if !self.discovered_tracks {
             self.track_list = self.discover_tracks();
             for track in &self.track_list {
                 println!("{:?}", track);
             }
-            for track in &self.track_list {
-                let mut tracks = Vec::new();
-                if track.len() == 1 {
-                    let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\map.png";
-                    println!("{}", image_path);
-                    let file = std::fs::read(image_path);
-                    match file {
-                        Ok(ref thing) => {
-                            let image = image::load_from_memory(&*file.unwrap()).unwrap();
-                            let size = [image.width() as usize, image.height() as usize];
-                            let image_buffer = image.to_rgba8();
-                            let pixels = image_buffer.into_vec();
-                            let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                            let texture = ui.ctx().load_texture("track", image, Default::default());
-                            tracks.push(texture);
-                            // let image = Image::from_texture(&texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                            // ui.add(image);
-                        }
-                        _ => {}
-                    }
-                } else {
-                    let mut i = 1;
-                    while i < 2 { // track.len() { // TODO: Change it so that not all loaded at once for less lag
-                        let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\" + track.get(i).unwrap() + "\\map.png";
-                        let file = std::fs::read(image_path);
-                        match file {
-                            Ok(ref thing) => {
-                                let image = image::load_from_memory(&*file.unwrap()).unwrap();
-                                let size = [image.width() as usize, image.height() as usize];
-                                let image_buffer = image.to_rgba8();
-                                let pixels = image_buffer.into_vec();
-                                let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                                let texture = ui.ctx().load_texture("track", image, Default::default());
-                                tracks.push(texture);
-                                // let image = Image::from_texture(&texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                                // ui.add(image);
-                            }
-                            _ => {}
-                        }
-
-                        i += 1;
-                    }
-                }
-                self.track_textures.push(tracks);
-            }
+            self.generate_track_textures(ui);
             self.discovered_tracks = true;
         }
-        for arr in &self.track_textures {
-            for tex in arr {
-                let image = Image::from_texture(&*tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                ui.add(image);
-            }
-        }
-        // TODO: Add texture to Vec so dont have to lag out, use names???
+        self.display_track_images(ui);
+        // TODO: Add texture to Vec so dont have to lag out, use names??? multithreading????
     }
 
+    // TODO: Still not perfect, relies on map.png not being present in root folder (see sunrise_circuit). Change to check for map inside subfolders??
     fn discover_tracks(&mut self) -> Vec<Vec<String>> {
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\tracks";
         let inner = std::fs::read_dir(path.clone()).unwrap();
@@ -127,5 +67,91 @@ impl ServerManager {
             result.push(track_arr);
         }
         return result;
+    }
+
+    // TODO: If for some reason a track doesnt have a preview it might have a 'outline.png' file instead
+    fn generate_track_textures(&mut self, ui: &mut egui::Ui) {
+        let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\tracks";
+        for track in &self.track_list {
+            let mut tracks = Vec::new();
+            if track.len() == 1 {
+                let image_path = path.clone() + "\\" + &*track.get(0).unwrap() + "\\ui\\preview.png";
+                println!("{}", image_path);
+                let file = std::fs::read(image_path);
+                match file {
+                    Ok(ref thing) => {
+                        let image = image::load_from_memory(&*file.unwrap()).unwrap();
+                        let size = [image.width() as usize, image.height() as usize];
+                        let image_buffer = image.to_rgba8();
+                        let pixels = image_buffer.into_vec();
+                        let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
+                        let texture = ui.ctx().load_texture("track", image, Default::default());
+                        tracks.push(texture);
+                    }
+                    _ => {
+                        let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\outline.png";
+                        let file = std::fs::read(image_path);
+                        match file {
+                            Ok(ref thing) => {
+                                let image = image::load_from_memory(&*file.unwrap()).unwrap();
+                                let size = [image.width() as usize, image.height() as usize];
+                                let image_buffer = image.to_rgba8();
+                                let pixels = image_buffer.into_vec();
+                                let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
+                                let texture = ui.ctx().load_texture("track", image, Default::default());
+                                tracks.push(texture);
+                            }
+                            _ => {
+                                println!("Could not find image for: {}", track.get(0).unwrap());
+                            }
+                        }
+                    }
+                }
+            } else {
+                let mut i = 1;
+                while i < track.len() { // track.len() { // TODO: Change it so that not all loaded at once for less lag
+                    let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\" + track.get(i).unwrap() + "\\preview.png";
+                    let file = std::fs::read(image_path);
+                    match file {
+                        Ok(ref thing) => {
+                            let image = image::load_from_memory(&*file.unwrap()).unwrap();
+                            let size = [image.width() as usize, image.height() as usize];
+                            let image_buffer = image.to_rgba8();
+                            let pixels = image_buffer.into_vec();
+                            let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
+                            let texture = ui.ctx().load_texture("track", image, Default::default());
+                            tracks.push(texture);
+                        }
+                        _ => {
+                            println!("Could not fine image for: {}", track.get(0).unwrap());
+                        }
+                    }
+
+                    i += 1;
+                }
+            }
+            self.track_textures.push(tracks);
+        }
+    }
+
+    fn display_track_images(&mut self, ui: &mut egui::Ui) {
+        let mut i = 0;
+        for arr in &self.track_textures {
+            let mut j = 0;
+            ui.horizontal(|ui| {
+                for tex in arr {
+                    let image = Image::from_texture(&*tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+
+                    // let button = egui::ImageButton::new(image);
+                    // let sense = egui::Sense::click();
+                    // let button = button.sense(sense);
+                    if egui::Button::image(image).ui(ui).clicked() {
+                        println!("{}, {}", i, j);
+                    }
+                    j += 1;
+                }
+            });
+            i += 1;
+        }
     }
 }

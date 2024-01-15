@@ -19,6 +19,7 @@ impl Default for ServerManager {
             expand: false,
             discovered_tracks: false,
             track_list: vec![],
+            display_track_images: false,
             track_textures: vec![],
         }
     }
