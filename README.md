@@ -1,2 +1,2 @@
 # Assetto Corsa Server Manager
-An **WIP** alternative Assetto Corsa server manager written in rust
+A **WIP** alternative Assetto Corsa server manager written in rust
