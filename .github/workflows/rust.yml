@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: librust-atk-dev
+          packages: librust-atk-dev gdk-3.0
           version: 1.0
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
