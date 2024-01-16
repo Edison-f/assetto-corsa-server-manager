@@ -230,7 +230,8 @@ impl eframe::App for ServerManager {
                         }
                         let save_to_file = ui.button("Save to file");
                         if save_to_file.clicked() {
-                            let mut file = std::fs::File::create(format!("{}server\\cfg\\temp_server_cfg.ini", self.assetto_corsa_path.clone().unwrap())).unwrap();
+                            let _ = std::fs::remove_file(format!("{}\\server\\cfg\\temp_server_cfg.ini", self.assetto_corsa_path.clone().unwrap()));
+                            let mut file = std::fs::File::create(format!("{}\\server\\cfg\\temp_server_cfg.ini", self.assetto_corsa_path.clone().unwrap())).unwrap();
                             file.write_all(serde_ini::to_string(&self.config).unwrap().as_bytes()).expect("Serialization Error");
                         }
                     }
