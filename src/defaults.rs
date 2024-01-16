@@ -21,9 +21,13 @@ impl Default for ServerManager {
             track_textures: vec![],
             discovered_cars: false,
             display_car_images: false,
+            available_car_list: vec![],
             car_list: vec![],
             car_textures: vec![],
-            car_filter: "".to_string(),
+            available_car_filter: "".to_string(),
+            car_list_filter: "".to_string(),
+            car_list_changed: false,
+            car_indices: vec![],
         }
     }
 }

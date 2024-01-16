@@ -200,7 +200,7 @@ impl ServerManager {
                 }
                 match track_config {
                     Some(track_config) => {
-                        self.config.server.config_track = self.track_list.get(x).unwrap().get(y).unwrap().to_string();
+                        self.config.server.config_track = track_config.to_string();
                     }
                     None => {
                         self.config.server.config_track = String::from("");

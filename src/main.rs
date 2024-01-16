@@ -182,9 +182,13 @@ struct ServerManager {
     track_textures: Vec<Vec<TextureHandle>>,
     discovered_cars: bool,
     display_car_images: bool,
+    available_car_list: Vec<String>,
     car_list: Vec<String>,
     car_textures: Vec<Vec<TextureHandle>>,
-    car_filter: String,
+    available_car_filter: String,
+    car_list_filter: String,
+    car_list_changed: bool,
+    car_indices: Vec<usize>,
 }
 
 impl ServerManager {
@@ -204,7 +208,7 @@ impl eframe::App for ServerManager {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("AC Alt Server Manager");
-            ui.columns(3, |ui| {
+            ui.columns(4, |ui| {
                 // Config Editing
                 egui::ScrollArea::vertical().show(&mut ui[0], |ui| {
                     if ui.button("Select 'assetto_corsa' Folder…").clicked() {
@@ -220,6 +224,8 @@ impl eframe::App for ServerManager {
                         ui.checkbox(&mut self.display_car_images, "Display Car Images");
                         if self.is_path_selected && ui.button("Load Config").clicked() {
                             self.parse();
+                            self.update_car_list_from_config();
+                            // Update car list from config
                             self.is_path_selected = false;
                         }
                         let save_to_file = ui.button("Save to file");
@@ -243,6 +249,7 @@ impl eframe::App for ServerManager {
                 });
                 if self.display_car_images {
                     self.display_available_cars(&mut ui[2]);
+                    self.display_car_list(&mut ui[3]);
                 }
             });
         });
