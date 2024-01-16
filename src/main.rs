@@ -187,7 +187,7 @@ struct ServerManager {
 
 impl ServerManager {
     fn parse(&mut self) {
-        let config_path = self.assetto_corsa_path.clone().unwrap() + "server\\cfg\\server_cfg.ini";
+        let config_path = self.assetto_corsa_path.clone().unwrap() + "\\server\\cfg\\server_cfg.ini";
         let config_contents = String::from_utf8(std::fs::read(config_path).unwrap()).unwrap();
         //let entry_path = self.server_path.clone().unwrap() + "\\cfg\\entry_list.ini";
         //let entry_contents = String::from_utf8(std::fs::read(entry_path).unwrap()).unwrap();
@@ -211,13 +211,11 @@ impl eframe::App for ServerManager {
                             self.is_path_selected = true;
                         }
                     }
-                    ui.text_edit_singleline(&mut self.config.server.name);
                     if let Some(picked_path) = &self.assetto_corsa_path {
-                        // ui.horizontal(|ui| {
                         ui.label("Selected Folder Path:");
                         ui.monospace(picked_path);
-                        // });
-                        ui.checkbox(&mut self.display_track_images, "Display Track Images (SLOW)");
+                        ui.checkbox(&mut self.display_track_images, "Display Track Images");
+                        ui.checkbox(&mut self.display_car_images, "Display Car Images");
                         if self.is_path_selected && ui.button("Load Config").clicked() {
                             self.parse();
                             self.is_path_selected = false;
@@ -239,6 +237,11 @@ impl eframe::App for ServerManager {
                 egui::ScrollArea::both().id_source("col2").show(&mut ui[1], |ui| {
                     if self.display_track_images {
                         self.display_tracks(ui);
+                    }
+                });
+                egui::ScrollArea::both().id_source("col3").show(&mut ui[2], |ui| {
+                    if self.display_car_images {
+                        self.display_cars(ui);
                     }
                 });
             });

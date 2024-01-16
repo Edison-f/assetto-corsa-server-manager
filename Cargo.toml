@@ -16,3 +16,6 @@ serde_ini = "0.2.0"
 serde = { version = "1.0.195", features = ["derive"] }
 image = { version = "0.24.8", features = ["jpeg", "png"] }
 epi = "0.17.0"
+
+[profile.release]
+strip = true

@@ -1,6 +1,6 @@
 use eframe::emath::Vec2;
 use eframe::epaint::ColorImage;
-use egui::{Image, Widget};
+use egui::{Image, Ui, Widget};
 use crate::ServerManager;
 
 /**
@@ -32,9 +32,9 @@ impl ServerManager {
 
     // TODO: Still not perfect, relies on map.png not being present in root folder (see sunrise_circuit). Change to check for map inside subfolders??
     fn discover_tracks(&mut self) -> Vec<Vec<String>> {
+        let mut result: Vec<Vec<String>> = Vec::new();
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\tracks";
         let inner = std::fs::read_dir(path.clone()).unwrap();
-        let mut result: Vec<Vec<String>> = Vec::new();
         'track_discovery: for outer_track_folder in inner {
             let mut track_arr: Vec<String> = Vec::new();
             let drm = outer_track_folder.unwrap().file_name();
@@ -68,7 +68,7 @@ impl ServerManager {
     }
 
     // TODO: If for some reason a track doesnt have a preview it might have a 'outline.png' file instead
-    fn generate_track_textures(&mut self, ui: &mut egui::Ui) {
+    fn generate_track_textures(&mut self, ui: &mut Ui) {
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\tracks";
         for track in &self.track_list {
             let mut tracks = Vec::new();
@@ -111,8 +111,8 @@ impl ServerManager {
                     let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\" + track.get(i).unwrap() + "\\preview.png";
                     let file = std::fs::read(image_path);
                     match file {
-                        Ok(ref thing) => {
-                            let image = image::load_from_memory(&*file.unwrap()).unwrap();
+                        Ok(ref valid_file) => {
+                            let image = image::load_from_memory(valid_file).unwrap();
                             let size = [image.width() as usize, image.height() as usize];
                             let image_buffer = image.to_rgba8();
                             let pixels = image_buffer.into_vec();
@@ -134,22 +134,63 @@ impl ServerManager {
 
     fn display_track_images(&mut self, ui: &mut egui::Ui) {
         let mut i = 0;
-        for arr in &self.track_textures {
+        let textures = self.track_list.clone();
+        'outer: for arr in textures {
             let mut j = 0;
             ui.horizontal(|ui| {
-                for tex in arr {
-                    let image = Image::from_texture(&*tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-
-                    // let button = egui::ImageButton::new(image);
-                    // let sense = egui::Sense::click();
-                    // let button = button.sense(sense);
-                    if egui::Button::image(image).ui(ui).clicked() {
-                        println!("{}, {}", i, j);
+                if arr.len() == 1 {
+                    let tex = self.track_textures.get(i).unwrap().get(0);
+                    match tex {
+                        Some(tex) => {
+                            let image = Image::from(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                            if egui::Button::image(image).ui(ui).clicked() {
+                                println!("{}, {}", i, j);
+                                self.change_track(i, j);
+                            }
+                        }
+                        _ => {}
+                    };
+                } else {
+                    'inner: for _track in &arr {
+                        if j == 0 && arr.len() > 1 {
+                            j += 1;
+                            continue 'inner;
+                        }
+                        let tex = self.track_textures.get(i).unwrap().get(j - 1).unwrap();
+                        let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                        if egui::Button::image(image).ui(ui).clicked() {
+                            println!("{}, {}", i, j);
+                            self.change_track(i, j);
+                        }
+                        j += 1;
                     }
-                    j += 1;
                 }
             });
             i += 1;
+        }
+    }
+
+
+    fn change_track(&mut self, x: usize, y: usize) {
+        let selected_track = self.track_list.get(x);
+        match selected_track {
+            Some(arr) => {
+                let track_config = arr.get(y);
+                self.config.server.track = self.track_list.get(x).unwrap().get(0).unwrap().to_string();
+                if y == 0 {
+                    self.config.server.config_track = String::from("");
+                    return;
+                }
+                match track_config {
+                    Some(track_config) => {
+                        self.config.server.config_track = self.track_list.get(x).unwrap().get(y).unwrap().to_string();
+                    }
+                    None => {
+                        self.config.server.config_track = String::from("");
+                    }
+                }
+            }
+            None => {}
         }
     }
 }
