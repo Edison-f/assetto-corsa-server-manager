@@ -6,7 +6,8 @@ mod deserialization;
 mod defaults;
 mod display_settings;
 mod display_tracks;
-mod display_cars;
+mod display_available_cars;
+mod display_car_list;
 
 use std::io::Write;
 // hide console window on Windows in release
@@ -183,6 +184,7 @@ struct ServerManager {
     display_car_images: bool,
     car_list: Vec<String>,
     car_textures: Vec<Vec<TextureHandle>>,
+    car_filter: String,
 }
 
 impl ServerManager {
@@ -239,11 +241,9 @@ impl eframe::App for ServerManager {
                         self.display_tracks(ui);
                     }
                 });
-                egui::ScrollArea::both().id_source("col3").show(&mut ui[2], |ui| {
-                    if self.display_car_images {
-                        self.display_cars(ui);
-                    }
-                });
+                if self.display_car_images {
+                    self.display_available_cars(&mut ui[2]);
+                }
             });
         });
     }

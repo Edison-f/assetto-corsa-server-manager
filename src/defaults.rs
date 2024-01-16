@@ -23,6 +23,7 @@ impl Default for ServerManager {
             display_car_images: false,
             car_list: vec![],
             car_textures: vec![],
+            car_filter: "".to_string(),
         }
     }
 }
