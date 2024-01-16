@@ -91,13 +91,18 @@ impl ServerManager {
                         let file = std::fs::read(image_path);
                         match file {
                             Ok(ref thing) => {
-                                let image = image::load_from_memory(&*file.unwrap()).unwrap();
-                                let size = [image.width() as usize, image.height() as usize];
-                                let image_buffer = image.to_rgba8();
-                                let pixels = image_buffer.into_vec();
-                                let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                                let texture = ui.ctx().load_texture("track", image, Default::default());
-                                tracks.push(texture);
+                                let image = image::load_from_memory(&*file.unwrap());
+                                match image {
+                                    Ok(image) => {
+                                        let size = [image.width() as usize, image.height() as usize];
+                                        let image_buffer = image.to_rgba8();
+                                        let pixels = image_buffer.into_vec();
+                                        let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
+                                        let texture = ui.ctx().load_texture("track", image, Default::default());
+                                        tracks.push(texture);
+                                    }
+                                    _ => {}
+                                }
                             }
                             _ => {
                                 println!("Could not find image for: {}", track.get(0).unwrap());
@@ -109,16 +114,22 @@ impl ServerManager {
                 let mut i = 1;
                 while i < track.len() { // track.len() { // TODO: Change it so that not all loaded at once for less lag
                     let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\" + track.get(i).unwrap() + "\\preview.png";
-                    let file = std::fs::read(image_path);
+                    let file = std::fs::read(image_path.clone());
+                    println!("{}", image_path);
                     match file {
                         Ok(ref valid_file) => {
-                            let image = image::load_from_memory(valid_file).unwrap();
-                            let size = [image.width() as usize, image.height() as usize];
-                            let image_buffer = image.to_rgba8();
-                            let pixels = image_buffer.into_vec();
-                            let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                            let texture = ui.ctx().load_texture("track", image, Default::default());
-                            tracks.push(texture);
+                            let image = image::load_from_memory(&*file.unwrap());
+                            match image {
+                                Ok(image) => {
+                                    let size = [image.width() as usize, image.height() as usize];
+                                    let image_buffer = image.to_rgba8();
+                                    let pixels = image_buffer.into_vec();
+                                    let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
+                                    let texture = ui.ctx().load_texture("track", image, Default::default());
+                                    tracks.push(texture);
+                                }
+                                _ => {}
+                            }
                         }
                         _ => {
                             println!("Could not fine image for: {}", track.get(0).unwrap());
@@ -135,7 +146,7 @@ impl ServerManager {
     fn display_track_images(&mut self, ui: &mut egui::Ui) {
         let mut i = 0;
         let textures = self.track_list.clone();
-        'outer: for arr in textures {
+        for arr in textures {
             let mut j = 0;
             ui.horizontal(|ui| {
                 if arr.len() == 1 {
@@ -156,12 +167,18 @@ impl ServerManager {
                             j += 1;
                             continue 'inner;
                         }
-                        let tex = self.track_textures.get(i).unwrap().get(j - 1).unwrap();
-                        let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                        if egui::Button::image(image).ui(ui).clicked() {
-                            println!("{}, {}", i, j);
-                            self.change_track(i, j);
+                        let tex = self.track_textures.get(i).unwrap().get(j - 1);
+                        match tex {
+                            Some(tex) => {
+                                let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                                if egui::Button::image(image).ui(ui).clicked() {
+                                    println!("{}, {}", i, j);
+                                    self.change_track(i, j);
+                                }
+                            }
+                            None => {}
                         }
+
                         j += 1;
                     }
                 }

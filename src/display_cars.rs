@@ -14,6 +14,10 @@ impl ServerManager {
         self.display_car_images(ui);
     }
 
+    fn search_bar(&mut self, ui: egui::Ui) {
+
+    }
+
     fn discover_cars(&self) -> Vec<String> {
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\cars";
         let mut result: Vec<String> = Vec::new();
