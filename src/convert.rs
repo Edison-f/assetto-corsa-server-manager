@@ -6,7 +6,7 @@ fn as_vec(arr: SplitN) -> Vec<String> {
     for s in arr {
         result.push(s.to_string());
     }
-    return result;
+    result
 }
 
 impl ServerManager {
@@ -14,17 +14,17 @@ impl ServerManager {
         let regex = Regex::new(r"=").unwrap();
         let mut modifier = 0;
         for s in arr {
-            if s != "" {
+            if !s.is_empty() {
                 modifier += 1;
             }
             let split: Vec<String> = as_vec(regex.splitn(s, 2));
             if split.len() >= 2 {
-                let curr = split.get(0).unwrap().as_str();
+                let curr = split.first().unwrap().as_str();
                 let val = split.get(1).unwrap();
-                if val.len() == 0 {
+                if val.is_empty() {
                     continue;
                 }
-                if modifier >= 2 && modifier <= 51 {
+                if (2..=51).contains(&modifier) {
                     match curr {
                         "NAME" => { self.config.server.name = val.parse().unwrap(); }
                         "CARS" => {
@@ -80,7 +80,7 @@ impl ServerManager {
                         "WELCOME_MESSAGE" => { self.config.server.welcome_message = val.parse().unwrap(); }
                         _ => {}
                     }
-                } else if modifier >= 53 && modifier <= 57 {
+                } else if (53..=57).contains(&modifier) {
                     match curr {
                         "HOST" => { self.config.ftp.host = val.parse().unwrap(); }
                         "LOGIN" => { self.config.ftp.login = val.parse().unwrap(); }
@@ -89,14 +89,14 @@ impl ServerManager {
                         "LINUX" => { self.config.ftp.linux = val.parse().unwrap(); }
                         _ => {}
                     }
-                } else if modifier >= 59 && modifier <= 61 {
+                } else if (59..=61).contains(&modifier) {
                     match curr {
                         "NAME" => { self.config.practice.name = val.parse().unwrap(); }
                         "TIME" => { self.config.practice.time = val.parse().unwrap(); }
                         "IS_OPEN" => { self.config.practice.is_open = val.parse().unwrap(); }
                         _ => {}
                     }
-                } else if modifier >= 63 && modifier <= 66 {
+                } else if (63..=66).contains(&modifier) {
                     match curr {
                         "SESSION_START" => { self.config.dynamic_track.session_start = val.parse().unwrap(); }
                         "RANDOMNESS" => { self.config.dynamic_track.randomness = val.parse().unwrap(); }

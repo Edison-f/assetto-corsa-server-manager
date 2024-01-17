@@ -31,7 +31,7 @@ macro_rules! row_display_num {
 impl ServerManager {
     pub(crate) fn display(&mut self, ui: &mut Ui) {
         ui.label("BRUH!");
-        self.expand = ui.button("Expand/Collapse Master Server Config").clicked() ^ self.expand;
+        self.expand ^= ui.button("Expand/Collapse Master Server Config").clicked();
         // egui::Grid::new("master_config").show(ui, |ui| {
         if self.expand {
             let expand_all_clicked = ui.button("Expand All").clicked();
@@ -43,19 +43,19 @@ impl ServerManager {
                 self.expand_weather = true;
                 self.expand_data = true;
             }
-            self.expand_all = expand_all_clicked ^ self.expand_all;
-            self.expand_server = ui.button("Expand/Collapse Server Config").clicked() ^ self.expand_server;
+            self.expand_all ^= expand_all_clicked;
+            self.expand_server ^= ui.button("Expand/Collapse Server Config").clicked();
             ui.end_row();
             if self.expand_server { self.display_server(ui) }
-            self.expand_ftp = ui.button("Expand/Collapse FTP Config").clicked() ^ self.expand_ftp;
+            self.expand_ftp ^= ui.button("Expand/Collapse FTP Config").clicked();
             if self.expand_ftp { self.display_ftp(ui); }
-            self.expand_practice = ui.button("Expand/Collapse Practice Config").clicked() ^ self.expand_practice;
+            self.expand_practice ^= ui.button("Expand/Collapse Practice Config").clicked();
             if self.expand_practice { self.display_practice(ui); }
-            self.expand_dynamic_track = ui.button("Expand/Collapse Dynamic Track Config").clicked() ^ self.expand_dynamic_track;
+            self.expand_dynamic_track ^= ui.button("Expand/Collapse Dynamic Track Config").clicked();
             if self.expand_dynamic_track { self.display_dynamic_track(ui); }
-            self.expand_weather = ui.button("Expand/Collapse Weather Config").clicked() ^ self.expand_weather;
+            self.expand_weather ^= ui.button("Expand/Collapse Weather Config").clicked();
             if self.expand_weather { self.display_weather(ui); }
-            self.expand_data = ui.button("Expand/Collapse Data Config").clicked() ^ self.expand_data;
+            self.expand_data ^= ui.button("Expand/Collapse Data Config").clicked();
             if self.expand_data { self.display_data(ui); }
         }
     }
@@ -161,7 +161,7 @@ impl ServerManager {
             ui.label("Name\t\t\t\t\t\t\t\t\t\t\t\t");
             ui.label("Value\t\t\t\t\t\t\t\t\t\t");
             ui.end_row();
-            if self.config.weather.len() == 0 {
+            if self.config.weather.is_empty() {
                 return;
             }
             row_display_str!(ui, "GRAPHICS", &mut self.config.weather[0].graphics);

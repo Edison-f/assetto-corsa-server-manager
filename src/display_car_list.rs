@@ -16,7 +16,7 @@ impl ServerManager {
                 let arr = self.car_textures.get(index);
                 match arr {
                     Some(arr) => {
-                        let tex = arr.get(0);
+                        let tex = arr.first();
                         match tex {
                             Some(tex) => {
                                 let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });

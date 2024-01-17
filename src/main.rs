@@ -11,7 +11,7 @@ mod display_car_list;
 
 use std::io::Write;
 // hide console window on Windows in release
-use egui_extras;
+
 use eframe::egui;
 use egui::TextureHandle;
 use regex::Regex;

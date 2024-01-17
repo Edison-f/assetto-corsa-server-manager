@@ -73,7 +73,7 @@ impl ServerManager {
         for track in &self.track_list {
             let mut tracks = Vec::new();
             if track.len() == 1 {
-                let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\preview.png";
+                let image_path = path.clone() + "\\" + track.first().unwrap() + "\\ui\\preview.png";
                 println!("{}", image_path);
                 let file = std::fs::read(image_path);
                 match file {
@@ -87,7 +87,7 @@ impl ServerManager {
                         tracks.push(texture);
                     }
                     _ => {
-                        let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\outline.png";
+                        let image_path = path.clone() + "\\" + track.first().unwrap() + "\\ui\\outline.png";
                         let file = std::fs::read(image_path);
                         match file {
                             Ok(ref thing) => {
@@ -105,7 +105,7 @@ impl ServerManager {
                                 }
                             }
                             _ => {
-                                println!("Could not find image for: {}", track.get(0).unwrap());
+                                println!("Could not find image for: {}", track.first().unwrap());
                             }
                         }
                     }
@@ -113,7 +113,7 @@ impl ServerManager {
             } else {
                 let mut i = 1;
                 while i < track.len() { // track.len() { // TODO: Maybe change it so that not all loaded at once for less lag (only problem in debug)
-                    let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\" + track.get(i).unwrap() + "\\preview.png";
+                    let image_path = path.clone() + "\\" + track.first().unwrap() + "\\ui\\" + track.get(i).unwrap() + "\\preview.png";
                     let file = std::fs::read(image_path.clone());
                     println!("{}", image_path);
                     match file {
@@ -132,7 +132,7 @@ impl ServerManager {
                             }
                         }
                         _ => {
-                            println!("Could not fine image for: {}", track.get(0).unwrap());
+                            println!("Could not fine image for: {}", track.first().unwrap());
                         }
                     }
 
@@ -150,7 +150,7 @@ impl ServerManager {
             let mut j = 0;
             ui.horizontal(|ui| {
                 if arr.len() == 1 {
-                    let tex = self.track_textures.get(i).unwrap().get(0);
+                    let tex = self.track_textures.get(i).unwrap().first();
                     match tex {
                         Some(tex) => {
                             let image = Image::from(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
@@ -193,7 +193,7 @@ impl ServerManager {
         match selected_track {
             Some(arr) => {
                 let track_config = arr.get(y);
-                self.config.server.track = self.track_list.get(x).unwrap().get(0).unwrap().to_string();
+                self.config.server.track = self.track_list.get(x).unwrap().first().unwrap().to_string();
                 if y == 0 {
                     self.config.server.config_track = String::from("");
                     return;
