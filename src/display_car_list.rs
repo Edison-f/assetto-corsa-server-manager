@@ -41,7 +41,7 @@ impl ServerManager {
         let mut builder = String::from("");
         let mut i = 0;
         for car in &self.car_list {
-            builder += &*car;
+            builder += car;
             if i != self.car_list.len() - 1 {
                 builder += ";";
             }
@@ -88,13 +88,13 @@ impl ServerManager {
 
     pub(crate) fn update_car_list_from_config(&mut self) {
         let regex = Regex::new(";").unwrap();
-        let split = regex.split(&*self.config.server.cars);
+        let split = regex.split(&self.config.server.cars);
         self.car_indices = vec![];
         for name in split {
             let finder = Regex::new(name).unwrap();
             let mut i = 0;
             'inner: for car in &self.available_car_list {
-                let found = finder.find(&*car);
+                let found = finder.find(car);
                 match found {
                     Some(_) => {
                         self.car_indices.push(i);

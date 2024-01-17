@@ -53,7 +53,7 @@ impl ServerManager {
         for s in &result {
             println!("{}", s);
         }
-        return result;
+        result
     }
 
     fn generate_car_textures(&mut self, ui: &mut egui::Ui) {
@@ -69,7 +69,7 @@ impl ServerManager {
                     let data = std::fs::read(image_path.clone());
                     match data {
                         Ok(data) => {
-                            let image = image::load_from_memory_with_format(&*data, ImageFormat::Jpeg);
+                            let image = image::load_from_memory_with_format(&data, ImageFormat::Jpeg);
                             match image {
                                 Ok(image) => {
                                     let size = [image.width() as usize, image.height() as usize];
@@ -81,7 +81,7 @@ impl ServerManager {
                                     result.push(texture);
                                 }
                                 Err(e) => {
-                                    let image = image::load_from_memory_with_format(&*std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
+                                    let image = image::load_from_memory_with_format(&std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
                                     let size = [image.width() as usize, image.height() as usize];
                                     let image_buffer = image.to_rgba8();
                                     let pixels = image_buffer.into_vec();
@@ -93,7 +93,7 @@ impl ServerManager {
                             }
                         }
                         Err(e) => { // Error happens when there is a file inside of the skin folder or when a folder does not have a preview.jpg file
-                            let image = image::load_from_memory_with_format(&*std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
+                            let image = image::load_from_memory_with_format(&std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
                             let size = [image.width() as usize, image.height() as usize];
                             let image_buffer = image.to_rgba8();
                             let pixels = image_buffer.into_vec();
@@ -118,7 +118,7 @@ impl ServerManager {
 
     fn display_car_images(&mut self, ui: &mut egui::Ui) {
         let mut i = 0;
-        let regex = Regex::new(&*self.available_car_filter);
+        let regex = Regex::new(&self.available_car_filter);
         match regex {
             Ok(regex) => {
                 for arr in &self.car_textures.clone() {
@@ -128,7 +128,7 @@ impl ServerManager {
                             match check {
                                 Some(_) => {
                                     for texture in arr {
-                                        let image = Image::from_texture(&*texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                                        let image = Image::from_texture(texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
                                         ui.horizontal(|ui| {
                                             if egui::Button::image(image).ui(ui).clicked() {
                                                 self.add_car(i);

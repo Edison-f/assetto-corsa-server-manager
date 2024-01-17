@@ -64,7 +64,7 @@ impl ServerManager {
             }
             result.push(track_arr);
         }
-        return result;
+        result
     }
 
     // TODO: If for some reason a track doesnt have a preview it might have a 'outline.png' file instead
@@ -73,7 +73,7 @@ impl ServerManager {
         for track in &self.track_list {
             let mut tracks = Vec::new();
             if track.len() == 1 {
-                let image_path = path.clone() + "\\" + &*track.get(0).unwrap() + "\\ui\\preview.png";
+                let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\preview.png";
                 println!("{}", image_path);
                 let file = std::fs::read(image_path);
                 match file {
