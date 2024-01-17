@@ -16,7 +16,7 @@ use crate::ServerManager;
 // }
 
 impl ServerManager {
-    pub(crate) fn display_tracks(&mut self, ui: &mut egui::Ui) {
+    pub(crate) fn display_tracks(&mut self, ui: &mut Ui) {
         if !self.discovered_tracks {
             self.track_list = self.discover_tracks();
             for track in &self.track_list {
@@ -134,7 +134,7 @@ impl ServerManager {
         }
     }
 
-    fn display_track_images(&mut self, ui: &mut egui::Ui) {
+    fn display_track_images(&mut self, ui: &mut Ui) {
         let textures = self.track_list.clone();
         for (i, arr) in textures.into_iter().enumerate() {
             let mut j = 0;
