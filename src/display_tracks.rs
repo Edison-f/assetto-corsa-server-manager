@@ -78,7 +78,7 @@ impl ServerManager {
                 let file = std::fs::read(image_path);
                 match file {
                     Ok(ref thing) => {
-                        let image = image::load_from_memory(&*file.unwrap()).unwrap();
+                        let image = image::load_from_memory(thing).unwrap();
                         let size = [image.width() as usize, image.height() as usize];
                         let image_buffer = image.to_rgba8();
                         let pixels = image_buffer.into_vec();
@@ -91,7 +91,7 @@ impl ServerManager {
                         let file = std::fs::read(image_path);
                         match file {
                             Ok(ref thing) => {
-                                let image = image::load_from_memory(&*file.unwrap());
+                                let image = image::load_from_memory(thing);
                                 match image {
                                     Ok(image) => {
                                         let size = [image.width() as usize, image.height() as usize];
@@ -112,13 +112,13 @@ impl ServerManager {
                 }
             } else {
                 let mut i = 1;
-                while i < track.len() { // track.len() { // TODO: Change it so that not all loaded at once for less lag
+                while i < track.len() { // track.len() { // TODO: Maybe change it so that not all loaded at once for less lag (only problem in debug)
                     let image_path = path.clone() + "\\" + track.get(0).unwrap() + "\\ui\\" + track.get(i).unwrap() + "\\preview.png";
                     let file = std::fs::read(image_path.clone());
                     println!("{}", image_path);
                     match file {
                         Ok(ref valid_file) => {
-                            let image = image::load_from_memory(&*file.unwrap());
+                            let image = image::load_from_memory(valid_file);
                             match image {
                                 Ok(image) => {
                                     let size = [image.width() as usize, image.height() as usize];

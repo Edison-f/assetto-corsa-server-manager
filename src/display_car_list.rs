@@ -1,6 +1,5 @@
 use std::string::String;
 use eframe::emath::Vec2;
-use eframe::epaint::TextureHandle;
 use egui::{Image, Widget};
 use regex::Regex;
 use crate::ServerManager;
@@ -78,6 +77,12 @@ impl ServerManager {
                 break;
             }
         }
+        self.update_config_car_list();
+    }
+
+    pub(crate) fn add_car(&mut self, index: usize) {
+        self.car_indices.push(index);
+        self.car_list.push(String::from(self.available_car_list.get(index).unwrap()));
         self.update_config_car_list();
     }
 

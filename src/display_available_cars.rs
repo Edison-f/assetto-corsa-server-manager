@@ -38,7 +38,7 @@ impl ServerManager {
                                         }
                                     }
 
-                                    Err(e) => { break; }
+                                    Err(e) => { println!("{}", e); }
                                 }
                             }
                         }
@@ -114,16 +114,15 @@ impl ServerManager {
         }
     }
 
-    fn generate_skin_textures(&self, ui: &mut egui::Ui, index: usize) {}
+    fn _generate_skin_textures(&self, _ui: &mut egui::Ui, _index: usize) {}
 
-    fn display_car_images(&self, ui: &mut egui::Ui) {
+    fn display_car_images(&mut self, ui: &mut egui::Ui) {
         let mut i = 0;
         let regex = Regex::new(&*self.available_car_filter);
         match regex {
             Ok(regex) => {
-                for arr in &self.car_textures {
-                    let car_name = self.available_car_list.get(i);
-                    match car_name {
+                for arr in &self.car_textures.clone() {
+                    match self.available_car_list.clone().get(i) {
                         Some(car_name) => {
                             let check = regex.find(car_name); // Why doesn't regex.match() work? idk
                             match check {
@@ -132,6 +131,7 @@ impl ServerManager {
                                         let image = Image::from_texture(&*texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
                                         ui.horizontal(|ui| {
                                             if egui::Button::image(image).ui(ui).clicked() {
+                                                self.add_car(i);
                                                 println!("{}: {:?}", car_name, regex.find(car_name));
                                             }
                                             ui.label(car_name);
