@@ -8,6 +8,7 @@ mod display_settings;
 mod display_tracks;
 mod display_available_cars;
 mod display_car_list;
+mod utility;
 
 use std::io::Write;
 // hide console window on Windows in release
@@ -183,6 +184,7 @@ struct ServerManager {
     discovered_cars: bool,
     display_car_images: bool,
     available_car_list: Vec<String>,
+    available_skins_list: Vec<String>,
     car_list: Vec<String>,
     car_textures: Vec<Vec<TextureHandle>>,
     available_car_filter: String,

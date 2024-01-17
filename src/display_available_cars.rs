@@ -1,5 +1,4 @@
 use eframe::emath::Vec2;
-use eframe::epaint::ColorImage;
 use egui::{Image, TextureHandle, Widget};
 use image::ImageFormat;
 use regex::Regex;
@@ -69,21 +68,13 @@ impl ServerManager {
                             let image = image::load_from_memory_with_format(&data, ImageFormat::Jpeg);
                             match image {
                                 Ok(image) => {
-                                    let size = [image.width() as usize, image.height() as usize];
-                                    let image_buffer = image.to_rgba8();
-                                    let pixels = image_buffer.into_vec();
-                                    let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                                    let texture = ui.ctx().load_texture("car", image, Default::default());
                                     println!("Successfully created car texture: {}", image_path);
+                                    let texture = ServerManager::generate_texture(image, ui);
                                     result.push(texture);
                                 }
                                 Err(e) => {
                                     let image = image::load_from_memory_with_format(&std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
-                                    let size = [image.width() as usize, image.height() as usize];
-                                    let image_buffer = image.to_rgba8();
-                                    let pixels = image_buffer.into_vec();
-                                    let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                                    let texture = ui.ctx().load_texture("car", image, Default::default());
+                                    let texture = ServerManager::generate_texture(image, ui);
                                     result.push(texture);
                                     println!("{}", e);
                                 }
@@ -91,11 +82,7 @@ impl ServerManager {
                         }
                         Err(e) => { // Error happens when there is a file inside of the skin folder or when a folder does not have a preview.jpg file
                             let image = image::load_from_memory_with_format(&std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
-                            let size = [image.width() as usize, image.height() as usize];
-                            let image_buffer = image.to_rgba8();
-                            let pixels = image_buffer.into_vec();
-                            let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                            let texture = ui.ctx().load_texture("car", image, Default::default());
+                            let texture = ServerManager::generate_texture(image, ui);
                             result.push(texture);
                             println!("{}", e)
                         }

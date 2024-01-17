@@ -1,5 +1,4 @@
 use eframe::emath::Vec2;
-use eframe::epaint::ColorImage;
 use egui::{Image, Ui, Widget};
 use crate::ServerManager;
 
@@ -79,11 +78,7 @@ impl ServerManager {
                 match file {
                     Ok(ref thing) => {
                         let image = image::load_from_memory(thing).unwrap();
-                        let size = [image.width() as usize, image.height() as usize];
-                        let image_buffer = image.to_rgba8();
-                        let pixels = image_buffer.into_vec();
-                        let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                        let texture = ui.ctx().load_texture("track", image, Default::default());
+                        let texture = ServerManager::generate_texture(image, ui);
                         tracks.push(texture);
                     }
                     _ => {
@@ -94,11 +89,7 @@ impl ServerManager {
                                 let image = image::load_from_memory(thing);
                                 match image {
                                     Ok(image) => {
-                                        let size = [image.width() as usize, image.height() as usize];
-                                        let image_buffer = image.to_rgba8();
-                                        let pixels = image_buffer.into_vec();
-                                        let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                                        let texture = ui.ctx().load_texture("track", image, Default::default());
+                                        let texture = ServerManager::generate_texture(image, ui);
                                         tracks.push(texture);
                                     }
                                     _ => {
@@ -123,11 +114,7 @@ impl ServerManager {
                             let image = image::load_from_memory(valid_file);
                             match image {
                                 Ok(image) => {
-                                    let size = [image.width() as usize, image.height() as usize];
-                                    let image_buffer = image.to_rgba8();
-                                    let pixels = image_buffer.into_vec();
-                                    let image = ColorImage::from_rgba_unmultiplied(size, &pixels);
-                                    let texture = ui.ctx().load_texture("track", image, Default::default());
+                                    let texture = ServerManager::generate_texture(image, ui);
                                     tracks.push(texture);
                                 }
                                 _ => {

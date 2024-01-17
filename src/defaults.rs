@@ -22,6 +22,7 @@ impl Default for ServerManager {
             discovered_cars: false,
             display_car_images: false,
             available_car_list: vec![],
+            available_skins_list: vec![],
             car_list: vec![],
             car_textures: vec![],
             available_car_filter: "".to_string(),
