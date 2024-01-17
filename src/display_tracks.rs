@@ -101,7 +101,9 @@ impl ServerManager {
                                         let texture = ui.ctx().load_texture("track", image, Default::default());
                                         tracks.push(texture);
                                     }
-                                    _ => {}
+                                    _ => {
+                                        println!("Could not find image for: {}", track.first().unwrap());
+                                    }
                                 }
                             }
                             _ => {
@@ -128,7 +130,9 @@ impl ServerManager {
                                     let texture = ui.ctx().load_texture("track", image, Default::default());
                                     tracks.push(texture);
                                 }
-                                _ => {}
+                                _ => {
+                                    println!("Could not fine image for: {}", track.first().unwrap());
+                                }
                             }
                         }
                         _ => {
@@ -144,22 +148,18 @@ impl ServerManager {
     }
 
     fn display_track_images(&mut self, ui: &mut egui::Ui) {
-        let mut i = 0;
         let textures = self.track_list.clone();
-        for arr in textures {
+        for (i, arr) in textures.into_iter().enumerate() {
             let mut j = 0;
             ui.horizontal(|ui| {
                 if arr.len() == 1 {
                     let tex = self.track_textures.get(i).unwrap().first();
-                    match tex {
-                        Some(tex) => {
-                            let image = Image::from(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                            if egui::Button::image(image).ui(ui).clicked() {
-                                println!("{}, {}", i, j);
-                                self.change_track(i, j);
-                            }
+                    if let Some(tex) = tex {
+                        let image = Image::from(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                        if egui::Button::image(image).ui(ui).clicked() {
+                            println!("{}, {}", i, j);
+                            self.change_track(i, j);
                         }
-                        _ => {}
                     };
                 } else {
                     'inner: for _track in &arr {
@@ -168,22 +168,18 @@ impl ServerManager {
                             continue 'inner;
                         }
                         let tex = self.track_textures.get(i).unwrap().get(j - 1);
-                        match tex {
-                            Some(tex) => {
-                                let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                                if egui::Button::image(image).ui(ui).clicked() {
-                                    println!("{}, {}", i, j);
-                                    self.change_track(i, j);
-                                }
+                        if let Some(tex) = tex {
+                            let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                            if egui::Button::image(image).ui(ui).clicked() {
+                                println!("{}, {}", i, j);
+                                self.change_track(i, j);
                             }
-                            None => {}
                         }
 
                         j += 1;
                     }
                 }
             });
-            i += 1;
         }
     }
 
@@ -207,7 +203,9 @@ impl ServerManager {
                     }
                 }
             }
-            None => {}
+            None => {
+                println!("Selected index out of bounds");
+            }
         }
     }
 }

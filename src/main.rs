@@ -122,7 +122,7 @@ struct DataConfig {
     welcome_path: String,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Default, PartialEq, Debug)]
 struct MasterConfig {
     server: ServerConfig,
     ftp: FTPConfig,

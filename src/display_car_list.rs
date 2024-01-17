@@ -14,24 +14,18 @@ impl ServerManager {
             let indices = self.car_indices.clone();
             for index in indices {
                 let arr = self.car_textures.get(index);
-                match arr {
-                    Some(arr) => {
-                        let tex = arr.first();
-                        match tex {
-                            Some(tex) => {
-                                let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                                ui.horizontal(|ui| {
-                                    if egui::Button::image(image).ui(ui).clicked() {
-                                        println!("{}", index);
-                                        self.remove_car(&index);
-                                    }
-                                    ui.label(self.available_car_list.get(index).unwrap());
-                                });
+                if let Some(arr) = arr {
+                    let tex = arr.first();
+                    if let Some(tex) = tex {
+                        let image = Image::from_texture(tex).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                        ui.horizontal(|ui| {
+                            if egui::Button::image(image).ui(ui).clicked() {
+                                println!("{}", index);
+                                self.remove_car(&index);
                             }
-                            _ => {}
-                        }
+                            ui.label(self.available_car_list.get(index).unwrap());
+                        });
                     }
-                    _ => {}
                 }
             }
         });
@@ -39,13 +33,11 @@ impl ServerManager {
 
     fn update_config_car_list(&mut self) {
         let mut builder = String::from("");
-        let mut i = 0;
-        for car in &self.car_list {
+        for (i, car) in self.car_list.iter().enumerate() {
             builder += car;
             if i != self.car_list.len() - 1 {
                 builder += ";";
             }
-            i += 1;
         }
         self.config.server.cars = builder;
     }
@@ -59,20 +51,16 @@ impl ServerManager {
                     Some(car_name) => {
                         let regex = Regex::new(car_name).unwrap();
                         for j in 0..self.car_list.len() {
-                            match regex.find(self.car_list.get(j).unwrap()) {
-                                Some(res) => {
-                                    if res.start() == 0 && res.end() == self.car_list.get(j).unwrap().len() {
-                                        self.car_list.remove(j);
-                                        break;
-                                    }
+                            if let Some(res) = regex.find(self.car_list.get(j).unwrap()) {
+                                if res.start() == 0 && res.end() == self.car_list.get(j).unwrap().len() {
+                                    self.car_list.remove(j);
+                                    break;
                                 }
-
-                                _ => {}
                             }
                         }
                     }
 
-                    None => {}
+                    None => {println!("remove car: index out of bounds")}
                 }
                 break;
             }
@@ -92,19 +80,13 @@ impl ServerManager {
         self.car_indices = vec![];
         for name in split {
             let finder = Regex::new(name).unwrap();
-            let mut i = 0;
-            'inner: for car in &self.available_car_list {
+            'inner: for (i, car) in self.available_car_list.iter().enumerate() {
                 let found = finder.find(car);
-                match found {
-                    Some(_) => {
-                        self.car_indices.push(i);
-                        self.car_list.push(String::from(car));
-                        break 'inner;
-                    }
-
-                    None => {}
+                if found.is_some() {
+                    self.car_indices.push(i);
+                    self.car_list.push(String::from(car));
+                    break 'inner;
                 }
-                i += 1;
             }
         }
     }

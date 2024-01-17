@@ -32,7 +32,6 @@ impl ServerManager {
     pub(crate) fn display(&mut self, ui: &mut Ui) {
         ui.label("BRUH!");
         self.expand ^= ui.button("Expand/Collapse Master Server Config").clicked();
-        // egui::Grid::new("master_config").show(ui, |ui| {
         if self.expand {
             let expand_all_clicked = ui.button("Expand All").clicked();
             if expand_all_clicked {

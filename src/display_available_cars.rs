@@ -27,22 +27,19 @@ impl ServerManager {
             match car_folder {
                 Ok(car_folder) => {
                     let inner = std::fs::read_dir(car_folder.path());
-                    match inner {
-                        Ok(inner) => {
-                            for entry in inner {
-                                match entry {
-                                    Ok(entry) => {
-                                        if entry.file_name() == "ui" {
-                                            let file_name = car_folder.file_name();
-                                            result.push(file_name.to_str().unwrap().parse().unwrap());
-                                        }
+                    if let Ok(inner) = inner {
+                        for entry in inner {
+                            match entry {
+                                Ok(entry) => {
+                                    if entry.file_name() == "ui" {
+                                        let file_name = car_folder.file_name();
+                                        result.push(file_name.to_str().unwrap().parse().unwrap());
                                     }
-
-                                    Err(e) => { println!("{}", e); }
                                 }
+
+                                Err(e) => { println!("{}", e); }
                             }
                         }
-                        _ => {}
                     }
                 }
                 Err(e) => {
@@ -104,12 +101,13 @@ impl ServerManager {
                         }
                     }
                 }
-                _ => {}
+                _ => {
+                    println!("Skins not found for {}", car_name);
+                }
             }
         }
         for texture in result {
-            let mut arr = Vec::new();
-            arr.push(texture);
+            let arr = vec![texture];
             self.car_textures.push(arr);
         }
     }
@@ -122,28 +120,21 @@ impl ServerManager {
         match regex {
             Ok(regex) => {
                 for arr in &self.car_textures.clone() {
-                    match self.available_car_list.clone().get(i) {
-                        Some(car_name) => {
-                            let check = regex.find(car_name); // Why doesn't regex.match() work? idk
-                            match check {
-                                Some(_) => {
-                                    for texture in arr {
-                                        let image = Image::from_texture(texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                                        ui.horizontal(|ui| {
-                                            if egui::Button::image(image).ui(ui).clicked() {
-                                                self.add_car(i);
-                                                println!("{}: {:?}", car_name, regex.find(car_name));
-                                            }
-                                            ui.label(car_name);
-                                        });
+                    if let Some(car_name) = self.available_car_list.clone().get(i) {
+                        let check = regex.find(car_name); // Why doesn't regex.match() work? idk
+                        if check.is_some() {
+                            for texture in arr {
+                                let image = Image::from_texture(texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                                ui.horizontal(|ui| {
+                                    if egui::Button::image(image).ui(ui).clicked() {
+                                        self.add_car(i);
+                                        println!("{}: {:?}", car_name, regex.find(car_name));
                                     }
-                                }
-                                _ => {}
+                                    ui.label(car_name);
+                                });
                             }
-                            i += 1;
                         }
-
-                        None => {}
+                        i += 1;
                     }
                 }
             }

@@ -134,16 +134,3 @@ impl Default for DataConfig {
         }
     }
 }
-
-impl Default for MasterConfig {
-    fn default() -> Self {
-        Self {
-            server: ServerConfig::default(),
-            ftp: FTPConfig::default(),
-            practice: PracticeConfig::default(),
-            dynamic_track: DynamicTrackConfig::default(),
-            weather: Vec::new(),
-            data: DataConfig::default(),
-        }
-    }
-}

@@ -3,22 +3,6 @@
 version = 3
 
 [[package]]
-name = "AC"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "egui 0.25.0",
- "egui_extras",
- "env_logger",
- "epi",
- "image",
- "regex",
- "rfd",
- "serde",
- "serde_ini",
-]
-
-[[package]]
 name = "ab_glyph"
 version = "0.2.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -33,6 +17,22 @@ name = "ab_glyph_rasterizer"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c71b1793ee61086797f5c80b6efa2b8ffa6d5dd703f118545808a7f2e27f7046"
+
+[[package]]
+name = "ac"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "egui 0.25.0",
+ "egui_extras",
+ "env_logger",
+ "epi",
+ "image",
+ "regex",
+ "rfd",
+ "serde",
+ "serde_ini",
+]
 
 [[package]]
 name = "accesskit"

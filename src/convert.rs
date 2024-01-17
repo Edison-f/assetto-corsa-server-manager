@@ -78,7 +78,7 @@ impl ServerManager {
                         "AUTH_PLUGIN_ADDRESS" => { self.config.server.auth_plugin_address = val.parse().unwrap(); }
                         "LEGAL_TYRES" => { self.config.server.legal_tyres = val.parse().unwrap(); }
                         "WELCOME_MESSAGE" => { self.config.server.welcome_message = val.parse().unwrap(); }
-                        _ => {}
+                        _ => {println!("Entry {} does not exist", curr);}
                     }
                 } else if (53..=57).contains(&modifier) {
                     match curr {
@@ -87,14 +87,14 @@ impl ServerManager {
                         "PASSWORD" => { self.config.ftp.password = val.parse().unwrap(); }
                         "FOLDER" => { self.config.ftp.folder = val.parse().unwrap(); }
                         "LINUX" => { self.config.ftp.linux = val.parse().unwrap(); }
-                        _ => {}
+                        _ => {println!("Entry {} does not exist", curr);}
                     }
                 } else if (59..=61).contains(&modifier) {
                     match curr {
                         "NAME" => { self.config.practice.name = val.parse().unwrap(); }
                         "TIME" => { self.config.practice.time = val.parse().unwrap(); }
                         "IS_OPEN" => { self.config.practice.is_open = val.parse().unwrap(); }
-                        _ => {}
+                        _ => {println!("Entry {} does not exist", curr);}
                     }
                 } else if (63..=66).contains(&modifier) {
                     match curr {
@@ -102,7 +102,7 @@ impl ServerManager {
                         "RANDOMNESS" => { self.config.dynamic_track.randomness = val.parse().unwrap(); }
                         "SESSION_TRANSFER" => { self.config.dynamic_track.session_transfer = val.parse().unwrap(); }
                         "LAP_GAIN" => { self.config.dynamic_track.lap_gain = val.parse().unwrap(); }
-                        _ => {}
+                        _ => {println!("Entry {} does not exist", curr);}
                     }
                 } else if modifier >= 78 {
                     match curr {
@@ -112,7 +112,7 @@ impl ServerManager {
                         "EXSERVERHIDEWIN" => { self.config.data.exserverhidewin = val.parse().unwrap(); }
                         "WEBLINK" => { self.config.data.weblink = val.parse().unwrap(); }
                         "WELCOME_PATH" => { self.config.data.welcome_path = val.parse().unwrap(); }
-                        _ => {}
+                        _ => {println!("Entry {} does not exist", curr);}
                     }
                 }
             }
