@@ -1,6 +1,7 @@
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
-use crate::{DataConfig, DynamicTrackConfig, FTPConfig, MasterConfig, PracticeConfig, ServerConfig, WeatherConfig};
+
+use crate::{DataConfig, DynamicTrackConfig, EntryList, FTPConfig, MasterConfig, PracticeConfig, ServerConfig, WeatherConfig};
 
 /*
 macro_rules! option_serialize {
@@ -17,6 +18,7 @@ macro_rules! option_serialize {
 }
 */
 
+
 impl Serialize for MasterConfig {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
         let mut state = serializer.serialize_struct("MasterConfig", 3)?;
@@ -32,6 +34,25 @@ impl Serialize for MasterConfig {
     }
 }
 
+impl EntryList {
+    // Have to do this because of CAR_{i} needs to be static but I don't know how to make a string static and have changing variables without extreme hardcoding
+    pub(crate) fn serialize(&self) -> String {
+        let mut result = String::from("");
+        for i in 0..self.list.len() {
+            result += format!("[CAR_{}]\n", i).as_str();
+            result += format!("MODEL={}\n", self.list.get(i).unwrap().model).as_str();
+            result += format!("SKIN={}\n", self.list.get(i).unwrap().skin).as_str();
+            result += format!("SPECTATOR_MODE={}\n", self.list.get(i).unwrap().spectator_mode).as_str();
+            result += format!("DRIVERNAME={}\n", self.list.get(i).unwrap().driver_name).as_str();
+            result += format!("TEAM={}\n", self.list.get(i).unwrap().team).as_str();
+            result += format!("GUID={}\n", self.list.get(i).unwrap().guid).as_str();
+            result += format!("BALLAST={}\n", self.list.get(i).unwrap().ballast).as_str();
+            result += format!("RESTRICTOR={}\n\n", self.list.get(i).unwrap().restrictor).as_str();
+        }
+        result
+    }
+}
+
 impl Serialize for ServerConfig {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
         let mut state = serializer.serialize_struct("ServerConfig", 49)?;
@@ -40,14 +61,7 @@ impl Serialize for ServerConfig {
         state.serialize_field("CONFIG_TRACK", &self.config_track).expect("ServerConfig serialize went wrong");
         state.serialize_field("TRACK", &self.track).expect("ServerConfig serialize went wrong");
         state.serialize_field("SUN_ANGLE", &self.sun_angle).expect("ServerConfig serialize went wrong");
-        // match &self.password {
-        //     None => {
-        //         state.serialize_field("PASSWORD", "").expect("ServerConfig serialize went wrong")
-        //     }
-        //     Some(_string) => {
-                state.serialize_field("PASSWORD", &self.password).expect("ServerConfig serialize went wrong");
-        //     }
-        // }
+        state.serialize_field("PASSWORD", &self.password).expect("ServerConfig serialize went wrong");
         state.serialize_field("ADMIN_PASSWORD", &self.admin_password).expect("ServerConfig serialize went wrong");
         state.serialize_field("UDP_PORT", &self.udp_port).expect("ServerConfig serialize went wrong");
         state.serialize_field("TCP_PORT", &self.tcp_port).expect("ServerConfig serialize went wrong");
@@ -91,7 +105,6 @@ impl Serialize for ServerConfig {
         state.serialize_field("UDP_PLUGIN_ADDRESS", &self.udp_plugin_address).expect("ServerConfig serialize went wrong");
         state.serialize_field("AUTH_PLUGIN_ADDRESS", &self.auth_plugin_address).expect("ServerConfig serialize went wrong");
         state.serialize_field("LEGAL_TYRES", &self.legal_tyres).expect("ServerConfig serialize went wrong");
-        // option_serialize!(state, &self.welcome_message, "WELCOME_MESSAGE", "ServerConfig serialize went wrong");
         state.serialize_field("WELCOME_MESSAGE", &self.welcome_message).expect("ServerConfig serialize went wrong");
         state.end()
     }

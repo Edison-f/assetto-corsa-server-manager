@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod convert;
+mod parse_server_config;
 mod serialization;
 mod deserialization;
 mod defaults;
@@ -9,6 +9,7 @@ mod display_tracks;
 mod display_available_cars;
 mod display_car_list;
 mod utility;
+mod parse_entry_file;
 
 use std::io::Write;
 // hide console window on Windows in release
@@ -146,21 +147,34 @@ struct WeatherConfig {
     wind_variation_direction: String,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Default, PartialEq, Debug)]
 struct EntryList {
-    entries: Vec<Car>,
+    list: Vec<Car>,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 struct Car {
     model: String,
     skin: String,
-    spectator_mode: bool,
-    driver_name: Option<String>,
-    team: Option<String>,
-    guid: u32,
-    ballast: u64,
-    restrictor: u8,
+    spectator_mode: String,
+    driver_name: String,
+    team: String,
+    guid: String,
+    ballast: String,
+    restrictor: String,
+}
+
+impl Car {
+    fn reset(&mut self) {
+        self.model = "".to_string();
+        self.skin = "".to_string();
+        self.spectator_mode = "".to_string();
+        self.driver_name = "".to_string();
+        self.team = "".to_string();
+        self.guid = "".to_string();
+        self.ballast = "".to_string();
+        self.restrictor = "".to_string();
+    }
 }
 
 #[derive(PartialEq)]
@@ -168,7 +182,7 @@ struct ServerManager {
     assetto_corsa_path: Option<String>,
     is_path_selected: bool,
     config: MasterConfig,
-    entry_list: Option<EntryList>,
+    entry_list: EntryList,
     expand_all: bool,
     expand_server: bool,
     expand_ftp: bool,
@@ -185,24 +199,30 @@ struct ServerManager {
     display_car_images: bool,
     available_car_list: Vec<String>,
     available_skins_list: Vec<String>,
-    car_list: Vec<String>,
-    car_textures: Vec<Vec<TextureHandle>>,
     available_car_filter: String,
+    car_skins: Vec<Vec<String>>,
+    car_textures: Vec<Vec<TextureHandle>>,
+    car_indices: Vec<usize>,
+    car_list: Vec<String>,
+    car_count: Vec<u8>,
     car_list_filter: String,
     car_list_changed: bool,
-    car_indices: Vec<usize>,
 }
 
 impl ServerManager {
     fn parse(&mut self) {
         let config_path = self.assetto_corsa_path.clone().unwrap() + "\\server\\cfg\\server_cfg.ini";
         let config_contents = String::from_utf8(std::fs::read(config_path).unwrap()).unwrap();
-        //let entry_path = self.server_path.clone().unwrap() + "\\cfg\\entry_list.ini";
-        //let entry_contents = String::from_utf8(std::fs::read(entry_path).unwrap()).unwrap();
+        let entry_path = self.assetto_corsa_path.clone().unwrap() + "\\server\\cfg\\entry_list.ini";
+        let entry_contents = String::from_utf8(std::fs::read(entry_path).unwrap()).unwrap();
         let regex = Regex::new(r"(?m)([\r\n])+").unwrap();
         let split_config = regex.split(config_contents.as_str());
-        self.convert(split_config);
+        self.parse_server_config(split_config);
+        let split_entry_list = regex.split(entry_contents.as_str());
+        self.parse_entry_list(split_entry_list);
         println!("{}", serde_ini::to_string(&self.config).unwrap());
+        // println!("{:?}", self.entry_list);
+        println!("{}", &self.entry_list.serialize());
     }
 }
 
@@ -227,7 +247,6 @@ impl eframe::App for ServerManager {
                         if self.is_path_selected && ui.button("Load Config").clicked() {
                             self.parse();
                             self.update_car_list_from_config();
-                            // Update car list from config
                             self.is_path_selected = false;
                         }
                         let save_to_file = ui.button("Save to file");
@@ -250,6 +269,7 @@ impl eframe::App for ServerManager {
                         self.display_tracks(ui);
                     }
                 });
+
                 if self.display_car_images {
                     self.display_available_cars(&mut ui[2]);
                     self.display_car_list(&mut ui[3]);

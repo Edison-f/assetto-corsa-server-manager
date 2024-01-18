@@ -1,4 +1,4 @@
-use crate::{DataConfig, DynamicTrackConfig, FTPConfig, MasterConfig, ServerManager, PracticeConfig, ServerConfig};
+use crate::{DataConfig, DynamicTrackConfig, FTPConfig, MasterConfig, ServerManager, PracticeConfig, ServerConfig, Car, EntryList};
 
 impl Default for ServerManager {
     fn default() -> Self {
@@ -6,7 +6,7 @@ impl Default for ServerManager {
             assetto_corsa_path: None,
             is_path_selected: false,
             config: MasterConfig::default(),
-            entry_list: None,
+            entry_list: EntryList::default(),
             expand_all: false,
             expand_server: false,
             expand_ftp: false,
@@ -29,6 +29,23 @@ impl Default for ServerManager {
             car_list_filter: "".to_string(),
             car_list_changed: false,
             car_indices: vec![],
+            car_skins: vec![],
+            car_count: vec![],
+        }
+    }
+}
+
+impl Default for Car {
+    fn default() -> Self {
+        Self {
+            model: "".to_string(),
+            skin: "".to_string(),
+            spectator_mode: "".to_string(),
+            driver_name: "".to_string(),
+            team: "".to_string(),
+            guid: "".to_string(),
+            ballast: "".to_string(),
+            restrictor: "".to_string(),
         }
     }
 }

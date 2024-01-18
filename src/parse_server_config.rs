@@ -1,7 +1,7 @@
 use regex::{Regex, Split, SplitN};
 use crate::ServerManager;
 
-fn as_vec(arr: SplitN) -> Vec<String> {
+pub(crate) fn as_vec(arr: SplitN) -> Vec<String> {
     let mut result: Vec<String> = Vec::new();
     for s in arr {
         result.push(s.to_string());
@@ -10,7 +10,7 @@ fn as_vec(arr: SplitN) -> Vec<String> {
 }
 
 impl ServerManager {
-    pub(crate) fn convert(&mut self, arr: Split) {
+    pub(crate) fn parse_server_config(&mut self, arr: Split) {
         let regex = Regex::new(r"=").unwrap();
         let mut modifier = 0;
         for s in arr {
