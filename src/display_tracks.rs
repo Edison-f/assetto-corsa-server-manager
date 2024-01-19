@@ -93,11 +93,13 @@ impl ServerManager {
                                         tracks.push(texture);
                                     }
                                     _ => {
+                                        tracks.push(self.generate_placeholder(ui));
                                         println!("Could not find image for: {}", track.first().unwrap());
                                     }
                                 }
                             }
                             _ => {
+                                tracks.push(self.generate_placeholder(ui));
                                 println!("Could not find image for: {}", track.first().unwrap());
                             }
                         }
@@ -118,11 +120,13 @@ impl ServerManager {
                                     tracks.push(texture);
                                 }
                                 _ => {
+                                    tracks.push(self.generate_placeholder(ui));
                                     println!("Could not fine image for: {}", track.first().unwrap());
                                 }
                             }
                         }
                         _ => {
+                            tracks.push(self.generate_placeholder(ui));
                             println!("Could not fine image for: {}", track.first().unwrap());
                         }
                     }
@@ -139,6 +143,7 @@ impl ServerManager {
         for (i, arr) in textures.into_iter().enumerate() {
             let mut j = 0;
             ui.horizontal(|ui| {
+                ui.label(arr.first().unwrap());
                 if arr.len() == 1 {
                     let tex = self.track_textures.get(i).unwrap().first();
                     if let Some(tex) = tex {

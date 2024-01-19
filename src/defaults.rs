@@ -22,15 +22,16 @@ impl Default for ServerManager {
             discovered_cars: false,
             display_car_images: false,
             available_car_list: vec![],
-            available_skins_list: vec![],
+            available_skins_list: Default::default(),
             car_list: vec![],
             car_textures: vec![],
             available_car_filter: "".to_string(),
             car_list_filter: "".to_string(),
             car_list_changed: false,
             car_indices: vec![],
-            car_skins: vec![],
-            car_count: vec![],
+            car_skins: Default::default(),
+            car_count: Default::default(),
+            expand_available_skins: Default::default(),
         }
     }
 }

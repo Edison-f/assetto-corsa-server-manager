@@ -11,6 +11,7 @@ mod display_car_list;
 mod utility;
 mod parse_entry_file;
 
+use std::collections::HashMap;
 use std::io::Write;
 // hide console window on Windows in release
 
@@ -198,13 +199,14 @@ struct ServerManager {
     discovered_cars: bool,
     display_car_images: bool,
     available_car_list: Vec<String>,
-    available_skins_list: Vec<String>,
+    available_skins_list: HashMap<String, Vec<String>>,
+    expand_available_skins: HashMap<String, bool>,
     available_car_filter: String,
-    car_skins: Vec<Vec<String>>,
+    car_skins: HashMap<String, String>,
     car_textures: Vec<Vec<TextureHandle>>,
     car_indices: Vec<usize>,
     car_list: Vec<String>,
-    car_count: Vec<u8>,
+    car_count: HashMap<String, u8>,
     car_list_filter: String,
     car_list_changed: bool,
 }
