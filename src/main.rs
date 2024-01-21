@@ -12,7 +12,6 @@ mod utility;
 mod parse_entry_file;
 
 use std::collections::HashMap;
-use std::hash::Hash;
 use std::io::Write;
 // hide console window on Windows in release
 

@@ -1,4 +1,4 @@
-use crate::{DataConfig, DynamicTrackConfig, FTPConfig, MasterConfig, ServerManager, PracticeConfig, ServerConfig, Car, EntryList};
+use crate::{DataConfig, DynamicTrackConfig, FTPConfig, PracticeConfig, ServerConfig, Car};
 
 impl Default for Car {
     fn default() -> Self {
