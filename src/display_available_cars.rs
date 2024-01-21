@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use eframe::emath::Vec2;
 use egui::{Image, TextureHandle, Widget};
 use image::ImageFormat;
@@ -54,7 +56,6 @@ impl ServerManager {
 
     fn generate_car_textures(&mut self, ui: &mut egui::Ui) {
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\cars";
-        let mut result: Vec<TextureHandle> = Vec::new();
         for car_name in &self.available_car_list {
             let skin_path = format!("{}\\{}\\skins", path.clone(), car_name);
             let skin_name = std::fs::read_dir(skin_path.clone());
@@ -71,12 +72,16 @@ impl ServerManager {
                                 Ok(image) => {
                                     println!("Successfully created car texture: {}", image_path);
                                     let texture = ServerManager::generate_texture(image, ui);
-                                    result.push(texture);
+                                    let mut map = HashMap::new();
+                                    map.insert(skin_name, texture);
+                                    self.car_textures.insert(car_name.clone(), map);
                                 }
                                 Err(e) => {
                                     let image = image::load_from_memory_with_format(&std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
                                     let texture = ServerManager::generate_texture(image, ui);
-                                    result.push(texture);
+                                    let mut map = HashMap::new();
+                                    map.insert(skin_name, texture);
+                                    self.car_textures.insert(car_name.clone(), map);
                                     println!("{}", e);
                                 }
                             }
@@ -84,7 +89,9 @@ impl ServerManager {
                         Err(e) => { // Error happens when there is a file inside of the skin folder or when a folder does not have a preview.jpg file
                             let image = image::load_from_memory_with_format(&std::fs::read(format!("{}\\launcher\\themes\\default\\graphics\\logo.png", self.assetto_corsa_path.clone().unwrap())).unwrap(), ImageFormat::Png).unwrap();
                             let texture = ServerManager::generate_texture(image, ui);
-                            result.push(texture);
+                            let mut map = HashMap::new();
+                            map.insert(skin_name, texture);
+                            self.car_textures.insert(car_name.clone(), map);
                             println!("{}", e)
                         }
                     }
@@ -93,10 +100,6 @@ impl ServerManager {
                     println!("Skins not found for {}", car_name);
                 }
             }
-        }
-        for texture in result {
-            let arr = vec![texture];
-            self.car_textures.push(arr);
         }
     }
 
@@ -132,7 +135,7 @@ impl ServerManager {
                     match data {
                         Ok(data) => {
                             let image = image::load_from_memory(&data);
-                            result.push(ServerManager::generate_texture(image.unwrap(), ui));
+                            self.car_textures.get_mut(target_car).unwrap().insert(entry.file_name().into_string().unwrap(), ServerManager::generate_texture(image.unwrap(), ui));
                         }
 
                         Err(e) => {
@@ -146,9 +149,6 @@ impl ServerManager {
                 }
             }
         }
-        for texture in result {
-            self.car_textures.get_mut(index).unwrap().push(texture);
-        }
     }
 
     fn display_car_images(&mut self, ui: &mut egui::Ui) {
@@ -156,49 +156,86 @@ impl ServerManager {
         let regex = Regex::new(&self.available_car_filter);
         match regex {
             Ok(regex) => {
-                for arr in &self.car_textures.clone() {
-                    if let Some(car_name) = self.available_car_list.clone().get(i) {
-                        let check = regex.find(car_name); // Why doesn't regex.match() work? idk
-                        if check.is_some() {
-                            let mut j = 0;
-                            ui.horizontal(|ui| {
-                                ui.label(car_name);
-                                for texture in arr {
-                                    if j == 1 && !self.expand_available_skins.get(car_name).unwrap_or(&false) {
-                                        break;
-                                    }
-                                    let image = Image::from_texture(texture).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                                    let button = egui::Button::image(image).ui(ui);
-                                    if button.clicked() {
-                                        self.add_car(i);
-                                        println!("{}: {:?}", car_name, regex.find(car_name));
-                                    }
+                for car_name in &self.available_car_list.clone() {
+                    let mut j = 0;
+                    ui.horizontal(|ui| {
+                        let pair = self.car_textures.get(car_name).unwrap().clone();
+                        for (_, texture) in pair {
+                            // if j == 1 && !self.expand_available_skins.get(car_name).unwrap_or(&false) {
+                            //     break;
+                            // }
+                            let texture = &texture.clone();
+                            let image = Image::from_texture(texture).fit_to_exact_size(Vec2 { x: 120.0, y: 65.0 });
+                            let button = egui::Button::image(image).ui(ui);
+                            if button.clicked() {
+                                self.add_car(i, j);
+                                println!("{}: {:?}", car_name, regex.find(car_name));
+                            }
 
-                                    if button.secondary_clicked() {
-                                        let expand = self.expand_available_skins.get(car_name);
-                                        match expand {
-                                            Some(expand) => {
-                                                self.expand_available_skins.insert(car_name.clone(), !expand);
-                                            }
-                                            None => {
-                                                self.expand_available_skins.insert(car_name.clone(), true);
-                                            }
-                                        }
-                                        if self.available_skins_list.get(car_name).is_none() {
-                                            self.generate_skin_textures(ui, i);
-                                            self.available_skins_list.insert(car_name.clone(), self.discover_skins(car_name));
-                                        }
-                                        println!("{}", i);
-                                    }
-                                    j += 1;
+                            if button.secondary_clicked() {
+                                // let expand = self.expand_available_skins.get(car_name);
+                                // match expand {
+                                //     Some(expand) => {
+                                //         self.expand_available_skins.insert(car_name.clone(), !expand);
+                                //     }
+                                //     None => {
+                                //         self.expand_available_skins.insert(car_name.clone(), true);
+                                //     }
+                                // }
+                                if self.car_textures.get(car_name).unwrap().len() == 1 {
+                                    self.generate_skin_textures(ui, i);
+                                    self.available_skins_list.insert(car_name.clone(), self.discover_skins(car_name));
                                 }
-                            });
+                                println!("{}", i);
+                            }
+                            if j == 0 {
+                                ui.label(car_name);
+                            }
+                            j += 1;
                         }
-                        i += 1;
-                    }
-                }
-            }
+                    });
 
+                    // if let Some(car_name) = self.available_car_list.clone().get(i) {
+                    //     let check = regex.find(car_name); // Why doesn't regex.match() work? idk
+                    //     if check.is_some() {
+                    //         let mut j = 0;
+                    //         ui.horizontal(|ui| {
+                    //             for (_, texture) in arr.1 {
+                    //                 if j == 1 && !self.expand_available_skins.get(car_name).unwrap_or(&false) {
+                    //                     break;
+                    //                 }
+                    //                 let image = Image::from_texture(texture).fit_to_exact_size(Vec2 { x: 120.0, y: 65.0 });
+                    //                 let button = egui::Button::image(image).ui(ui);
+                    //                 if button.clicked() {
+                    //                     self.add_car(i, j);
+                    //                     println!("{}: {:?}", car_name, regex.find(car_name));
+                    //                 }
+                    //
+                    //                 if button.secondary_clicked() {
+                    //                     let expand = self.expand_available_skins.get(car_name);
+                    //                     match expand {
+                    //                         Some(expand) => {
+                    //                             self.expand_available_skins.insert(car_name.clone(), !expand);
+                    //                         }
+                    //                         None => {
+                    //                             self.expand_available_skins.insert(car_name.clone(), true);
+                    //                         }
+                    //                     }
+                    //                     if self.car_textures.get(car_name).unwrap().len() == 1 {
+                    //                         self.generate_skin_textures(ui, i);
+                    //                         self.available_skins_list.insert(car_name.clone(), self.discover_skins(car_name));
+                    //                     }
+                    //                     println!("{}", i);
+                    //                 }
+                    //                 if j == 0 {
+                    //                     ui.label(car_name);
+                    //                 }
+                    //                 j += 1;
+                    //             }
+                    //         });
+                }
+                i += 1;
+            }
             Err(_e) => {}
         }
     }

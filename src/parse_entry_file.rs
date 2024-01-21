@@ -28,7 +28,7 @@ impl ServerManager {
                     "MODEL" => {
                         curr_skin_model = val.clone();
                         curr.model = val.clone();
-                        self.car_count.insert(val.clone(), self.car_count.get(&val).unwrap_or(&0) + 1);
+                        // self.car_count.insert(val.clone(), self.car_count.get(&val).unwrap_or(&0) + 1);
                     }
                     "SKIN" => {
                         curr.skin = val.clone();

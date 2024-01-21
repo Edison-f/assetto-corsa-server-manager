@@ -1,41 +1,5 @@
 use crate::{DataConfig, DynamicTrackConfig, FTPConfig, MasterConfig, ServerManager, PracticeConfig, ServerConfig, Car, EntryList};
 
-impl Default for ServerManager {
-    fn default() -> Self {
-        Self {
-            assetto_corsa_path: None,
-            is_path_selected: false,
-            config: MasterConfig::default(),
-            entry_list: EntryList::default(),
-            expand_all: false,
-            expand_server: false,
-            expand_ftp: false,
-            expand_practice: false,
-            expand_dynamic_track: false,
-            expand_weather: false,
-            expand_data: false,
-            expand: false,
-            discovered_tracks: false,
-            display_track_images: false,
-            track_list: vec![],
-            track_textures: vec![],
-            discovered_cars: false,
-            display_car_images: false,
-            available_car_list: vec![],
-            available_skins_list: Default::default(),
-            car_list: vec![],
-            car_textures: vec![],
-            available_car_filter: "".to_string(),
-            car_list_filter: "".to_string(),
-            car_list_changed: false,
-            car_indices: vec![],
-            car_skins: Default::default(),
-            car_count: Default::default(),
-            expand_available_skins: Default::default(),
-        }
-    }
-}
-
 impl Default for Car {
     fn default() -> Self {
         Self {

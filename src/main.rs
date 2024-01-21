@@ -12,6 +12,7 @@ mod utility;
 mod parse_entry_file;
 
 use std::collections::HashMap;
+use std::hash::Hash;
 use std::io::Write;
 // hide console window on Windows in release
 
@@ -20,6 +21,11 @@ use egui::TextureHandle;
 use regex::Regex;
 use serde::{Deserialize};
 
+
+/* TODO:
+*   - Refactor any vector that can be converted into a HashMap into a HashMap
+*   - Change column count/width depending on active panels
+*/
 fn main() -> Result<(), eframe::Error> {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
@@ -178,7 +184,7 @@ impl Car {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Default, PartialEq)]
 struct ServerManager {
     assetto_corsa_path: Option<String>,
     is_path_selected: bool,
@@ -203,10 +209,9 @@ struct ServerManager {
     expand_available_skins: HashMap<String, bool>,
     available_car_filter: String,
     car_skins: HashMap<String, String>,
-    car_textures: Vec<Vec<TextureHandle>>,
+    car_textures: HashMap<String, HashMap<String, TextureHandle>>, // Car Name, <Car Name, Texture>
     car_indices: Vec<usize>,
-    car_list: Vec<String>,
-    car_count: HashMap<String, u8>,
+    car_list: Vec<(String, Vec<(String, u8)>)>, // Car Name, Skin, Count
     car_list_filter: String,
     car_list_changed: bool,
 }
@@ -248,7 +253,7 @@ impl eframe::App for ServerManager {
                         ui.checkbox(&mut self.display_car_images, "Display Car Images");
                         if self.is_path_selected && ui.button("Load Config").clicked() {
                             self.parse();
-                            self.update_car_list_from_config();
+                            // self.update_from_config();
                             self.is_path_selected = false;
                         }
                         let save_to_file = ui.button("Save to file");
