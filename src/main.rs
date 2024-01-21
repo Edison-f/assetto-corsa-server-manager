@@ -211,7 +211,7 @@ struct ServerManager {
     car_skins: HashMap<String, String>,
     car_textures: HashMap<String, HashMap<String, TextureHandle>>, // Car Name, <Car Name, Texture>
     car_indices: Vec<usize>,
-    car_list: Vec<(String, Vec<(String, u8)>)>, // Car Name, Skin, Count
+    car_list: HashMap<String, HashMap<String, u8>>, // Car Name, Skin, Count
     car_list_filter: String,
     car_list_changed: bool,
 }

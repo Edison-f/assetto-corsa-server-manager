@@ -160,7 +160,7 @@ impl ServerManager {
                     let mut j = 0;
                     ui.horizontal(|ui| {
                         let pair = self.car_textures.get(car_name).unwrap().clone();
-                        for (_, texture) in pair {
+                        for (skin_name, texture) in pair {
                             // if j == 1 && !self.expand_available_skins.get(car_name).unwrap_or(&false) {
                             //     break;
                             // }
@@ -168,8 +168,8 @@ impl ServerManager {
                             let image = Image::from_texture(texture).fit_to_exact_size(Vec2 { x: 120.0, y: 65.0 });
                             let button = egui::Button::image(image).ui(ui);
                             if button.clicked() {
-                                self.add_car(i, j);
-                                println!("{}: {:?}", car_name, regex.find(car_name));
+                                self.add_car(car_name, skin_name.clone());
+                                println!("{}: {:?}", car_name, skin_name);
                             }
 
                             if button.secondary_clicked() {

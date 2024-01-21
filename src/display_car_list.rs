@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::string::String;
 
 use eframe::emath::Vec2;
@@ -13,18 +14,18 @@ impl ServerManager {
         }
         egui::ScrollArea::both().id_source("car_list_scroll").show(ui, |ui| {
             // let indices = self.car_indices.clone();
-            for (car_name, arr) in &self.car_list {
+            for (car_name, map) in &self.car_list {
                 ui.horizontal(|ui| {
-                    let first_skin_name = &arr.get(0).unwrap().0;
-                    let image = Image::from_texture(self.car_textures.get(car_name).unwrap().get(first_skin_name).unwrap()).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                    let first_skin_name = map.iter().nth(0).unwrap();
+                    let image = Image::from_texture(self.car_textures.get(car_name).unwrap().get(first_skin_name.0).unwrap()).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
                     if egui::Button::image(image).ui(ui).clicked() {
                         println!("those!")
                     }
                     ui.label(car_name.clone());
-                    for (skin_name, count) in arr {
-                        for _ in 0..*count {
-                            let image = Image::from_texture(self.car_textures.get(car_name).unwrap().get(skin_name).unwrap()).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
-                            if egui::Button::image(image).ui(ui).clicked() {
+                    for (skin_name, count) in map {
+                        let image = Image::from_texture(self.car_textures.get(car_name).unwrap().get(skin_name).unwrap()).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
+                        for _i in 0..*count {
+                            if egui::Button::image(image.clone()).ui(ui).clicked() {
                                 println!("{}, {}", car_name, skin_name)
                             }
                         }
@@ -67,28 +68,38 @@ impl ServerManager {
     fn remove_car(&mut self, name: String, skin: String) {
         // let car_name = self.available_car_list.get(*index);
         // if let Some(car_name) = car_name {
-        for i in 0..self.car_list.len() {
-            let entry = &self.car_list.clone();
-            let entry = entry.get(i).unwrap();
-            let car_name = &entry.0;
-            let mut arr = &entry.1;
-            if &name != car_name {
-                continue;
+        let mut binding = self.car_list.get(&name).unwrap().clone();
+        let mut num = binding.get_mut(&skin).unwrap();
+        if *num == 0 {
+            self.car_list.get_mut(&name).unwrap().remove(&skin);
+            if self.car_list.get_mut(&name).unwrap().len() == 0 {
+                self.car_list.remove(&name);
             }
-            for j in 0..arr.len() {
-                let mut pair = &arr.get(j).unwrap();
-                if pair.0 == skin { // If name match
-                    self.car_list.get_mut(i).unwrap().1.get_mut(j).unwrap().1 -= 1; // Subtract count
-                    if pair.1 == 0 { // If no more
-                        self.car_list.get_mut(i).unwrap().1.remove(j); // Remove skin entry
-                        if arr.len() == 0 { // If no skin entries
-                            self.car_list.remove(i); // Remove
-                        }
-                    }
-                    return;
-                }
-            }
+        } else {
+            self.car_list.get_mut(&name).unwrap().insert(skin, *num - 1);
         }
+        // for i in 0..self.car_list.len() {
+        //     let entry = &self.car_list.clone();
+        //     let entry = entry.get(i).unwrap();
+        //     let car_name = &entry.0;
+        //     let mut arr = &entry.1;
+        //     if &name != car_name {
+        //         continue;
+        //     }
+        //     for j in 0..arr.len() {
+        //         let mut pair = &arr.get(j).unwrap();
+        //         if pair.0 == skin { // If name match
+        //             self.car_list.get_mut(i).unwrap().1.get_mut(j).unwrap().1 -= 1; // Subtract count
+        //             if pair.1 == 0 { // If no more
+        //                 self.car_list.get_mut(i).unwrap().1.remove(j); // Remove skin entry
+        //                 if arr.len() == 0 { // If no skin entries
+        //                     self.car_list.remove(i); // Remove
+        //                 }
+        //             }
+        //             return;
+        //         }
+        //     }
+        // }
         // }
         // for i in 0..self.car_indices.len() {
         //     if self.car_indices.get(i).unwrap() == index {
@@ -125,27 +136,63 @@ impl ServerManager {
      * Else
      *      Create entry for car name and skin, init at 1
      */
-    pub(crate) fn add_car(&mut self, i: usize, j: usize) {
-        self.car_indices.push(i);
-        let car_name = String::from(self.available_car_list.get(i).unwrap());
-        let binding = self.available_skins_list.clone();
-        let mut skin_name = binding.get(&car_name).unwrap().get(j).unwrap();
-        let find = self.name_exists(car_name.clone());
-        if find.0 {
-            let mut curr = &mut self.car_list.clone();
-                let mut curr = &mut curr.get_mut(find.1).unwrap().1;
-            let find = self.skin_exists(String::from(skin_name), &curr);
-            if find.0 {
-                curr.get_mut(find.1).unwrap().1 += 1;
+    /*
+    // pub(crate) fn add_car(&mut self, i: usize, j: usize) {
+    //     self.car_indices.push(i);
+    //     let car_name = String::from(self.available_car_list.get(i).unwrap());
+    //     let binding = self.available_skins_list.clone();
+    //     let mut skin_name = binding.get(&car_name).unwrap().get(j).unwrap();
+    //     let find = self.name_exists(car_name.clone());
+    //     if find.0 {
+    //         let mut curr = &mut self.car_list.clone();
+    //             let mut curr = &mut curr.get_mut(find.1).unwrap().1;
+    //         let find = self.skin_exists(String::from(skin_name), &curr);
+    //         if find.0 {
+    //             curr.get_mut(find.1).unwrap().1 += 1;
+    //         } else {
+    //             curr.push((String::from(skin_name), 1))
+    //         }
+    //     } else {
+    //         let arr = vec![(String::from(skin_name), 1)];
+    //         self.car_list.push((String::from(car_name), arr))
+    //     }
+    //     // self.car_list.insert(car_name.parse().unwrap(), self.car_list.get(car_name).unwrap_or());
+    //     // self.update_config_car_list();
+    // }
+     */
+    pub(crate) fn add_car(&mut self, car_name: &String, skin_name: String) {
+        if let Some(entry) = self.car_list.clone().get(car_name) {
+            if let Some(num) = entry.get(&skin_name) {
+                &self.car_list.get_mut(car_name).unwrap().remove(&skin_name);
+                self.car_list.get_mut(car_name).unwrap().insert(skin_name, num + 1);
             } else {
-                curr.push((String::from(skin_name), 1))
+                self.car_list.get_mut(car_name).unwrap().insert(skin_name, 1);
             }
         } else {
-            let arr = vec![(String::from(skin_name), 1)];
-            self.car_list.push((String::from(car_name), arr))
+            let mut inner: HashMap<String, u8> =  Default::default();
+            inner.insert(skin_name, 1);
+            self.car_list.insert(car_name.clone(), inner);
         }
-        // self.car_list.insert(car_name.parse().unwrap(), self.car_list.get(car_name).unwrap_or());
-        // self.update_config_car_list();
+        // let find = self.name_exists(car_name.clone());
+        // if find.0 {
+        //     let mut curr = &mut self.car_list;
+        //     let mut curr = &mut curr.get_mut(find.1).unwrap().1;
+        //     let find = self.skin_exists(String::from(skin_name.clone()), &curr);
+        //     if find.0 {
+        //         curr.get_mut(find.1).unwrap().1 += 1;
+        //     } else {
+        //         curr.push((String::from(&skin_name), 1))
+        //     }
+        // } else {
+        //     let arr = vec![(String::from(skin_name), 1)];
+        //     self.car_list.push((String::from(car_name), arr))
+        // }
+        // for car in &self.car_list {
+        //     println!("{}", car.0);
+        //     for entry in &car.1 {
+        //         println!("{}, {}", entry.0, entry.1)
+        //     }
+        // }
     }
 
     fn name_exists(&mut self, car: String) -> (bool, usize) {
