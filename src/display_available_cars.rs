@@ -121,9 +121,8 @@ impl ServerManager {
         result
     }
 
-    fn generate_skin_textures(&mut self, ui: &mut egui::Ui, index: usize) {
-        let target_car = self.available_car_list.get(index).unwrap();
-        let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\cars\\" + target_car + "\\skins\\";
+    fn generate_skin_textures(&mut self, ui: &mut egui::Ui, target_car: &String) {
+        let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\cars\\" + target_car.as_str() + "\\skins\\";
         let mut result: Vec<TextureHandle> = Vec::new();
         let read_dir = std::fs::read_dir(path.clone()).unwrap();
         for entry in read_dir {
@@ -183,7 +182,7 @@ impl ServerManager {
                                 //     }
                                 // }
                                 if self.car_textures.get(car_name).unwrap().len() == 1 {
-                                    self.generate_skin_textures(ui, i);
+                                    self.generate_skin_textures(ui, car_name);
                                     self.available_skins_list.insert(car_name.clone(), self.discover_skins(car_name));
                                 }
                                 println!("{}", i);
