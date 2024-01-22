@@ -14,7 +14,11 @@ impl ServerManager {
         }
         egui::ScrollArea::both().id_source("car_list_scroll").show(ui, |ui| {
             // let indices = self.car_indices.clone();
-            for (car_name, map) in &self.car_list {
+            for (car_name, map) in &self.car_list.clone() {
+                if map.is_empty() { // remove_car should deal with this, I don't know why this is even needed
+                    self.car_list.remove(car_name);
+                    continue;
+                }
                 ui.horizontal(|ui| {
                     let first_skin_name = map.iter().nth(0).unwrap();
                     let image = Image::from_texture(self.car_textures.get(car_name).unwrap().get(first_skin_name.0).unwrap()).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
@@ -26,6 +30,7 @@ impl ServerManager {
                         let image = Image::from_texture(self.car_textures.get(car_name).unwrap().get(skin_name).unwrap()).fit_to_exact_size(Vec2 { x: 120.0, y: 120.0 });
                         for _i in 0..*count {
                             if egui::Button::image(image.clone()).ui(ui).clicked() {
+                                self.remove_car(String::from(car_name), String::from(skin_name));
                                 println!("{}, {}", car_name, skin_name)
                             }
                         }
@@ -47,18 +52,19 @@ impl ServerManager {
     }
 
     // TODO: Add to car_list display
-    fn _remove_car(&mut self, name: String, skin: String) {
+    fn remove_car(&mut self, name: String, skin: String) {
         let binding = self.car_list.get(&name).unwrap().clone();
         let num = binding.get(&skin).unwrap();
-        if *num == 0 {
+        if *num == 1 {
             self.car_list.get_mut(&name).unwrap().remove(&skin);
+
+        } else {
+            self.car_list.get_mut(&name).unwrap().insert(skin, *num - 1);
             if self.car_list.get_mut(&name).unwrap().is_empty() {
                 self.car_list.remove(&name);
             }
-        } else {
-            self.car_list.get_mut(&name).unwrap().insert(skin, *num - 1);
         }
-        self.update_config_car_list();
+        // self.update_config_car_list(); TODO: Need to update
     }
 
 
