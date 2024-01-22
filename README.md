@@ -2,7 +2,7 @@
 A **WIP** alternative Assetto Corsa server manager written in rust
 
 # Requirements
-- An installation of rust
+- An installation of rust (if you're building it yourself)
 - Assetto Corsa
 - Might need AC Content Manager and CSP, you should probably have both anyways
 
