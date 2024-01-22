@@ -22,7 +22,6 @@ use serde::{Deserialize};
 
 
 /* TODO:
-*   - Refactor any vector that can be converted into a HashMap into a HashMap
 *   - Change column count/width depending on active panels
 */
 fn main() -> Result<(), eframe::Error> {
@@ -174,12 +173,12 @@ impl Car {
     fn reset(&mut self) {
         self.model = "".to_string();
         self.skin = "".to_string();
-        self.spectator_mode = "".to_string();
+        self.spectator_mode = "0".to_string();
         self.driver_name = "".to_string();
         self.team = "".to_string();
         self.guid = "".to_string();
-        self.ballast = "".to_string();
-        self.restrictor = "".to_string();
+        self.ballast = "0".to_string();
+        self.restrictor = "0".to_string();
     }
 }
 
@@ -243,6 +242,7 @@ impl eframe::App for ServerManager {
                         if let Some(path) = rfd::FileDialog::new().pick_folder() {
                             self.assetto_corsa_path = Some(path.display().to_string());
                             self.is_path_selected = true;
+                            println!("Path picked");
                         }
                     }
                     if let Some(picked_path) = &self.assetto_corsa_path {
@@ -251,15 +251,19 @@ impl eframe::App for ServerManager {
                         ui.checkbox(&mut self.display_track_images, "Display Track Images");
                         ui.checkbox(&mut self.display_car_images, "Display Car Images");
                         if self.is_path_selected && ui.button("Load Config").clicked() {
+                            println!("Parsing config files");
                             self.parse();
-                            self.update_from_config(ui);
+                            self.update_from_config(ui); // This is generating all available skins for each car in list, think about only generating necessary ones
                             self.is_path_selected = false;
                         }
                         let save_to_file = ui.button("Save to file");
                         if save_to_file.clicked() {
                             let _ = std::fs::remove_file(format!("{}\\server\\cfg\\temp_server_cfg.ini", self.assetto_corsa_path.clone().unwrap()));
                             let mut file = std::fs::File::create(format!("{}\\server\\cfg\\temp_server_cfg.ini", self.assetto_corsa_path.clone().unwrap())).unwrap();
-                            file.write_all(serde_ini::to_string(&self.config).unwrap().as_bytes()).expect("Serialization Error");
+                            file.write_all(serde_ini::to_string(&self.config).unwrap().as_bytes()).expect("ServerConfig Serialization Error");
+                            let _ = std::fs::remove_file(format!("{}\\server\\cfg\\temp_entry_list.ini", self.assetto_corsa_path.clone().unwrap()));
+                            let mut file = std::fs::File::create(format!("{}\\server\\cfg\\temp_entry_list.ini", self.assetto_corsa_path.clone().unwrap())).unwrap();
+                            file.write_all(self.entry_list.serialize().as_bytes()).expect("EntryList Serialization Error");
                         }
                     }
                     let print_config = ui.button("Print config");

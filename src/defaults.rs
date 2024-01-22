@@ -5,12 +5,12 @@ impl Default for Car {
         Self {
             model: "".to_string(),
             skin: "".to_string(),
-            spectator_mode: "".to_string(),
+            spectator_mode: "0".to_string(),
             driver_name: "".to_string(),
             team: "".to_string(),
             guid: "".to_string(),
-            ballast: "".to_string(),
-            restrictor: "".to_string(),
+            ballast: "0".to_string(),
+            restrictor: "0".to_string(),
         }
     }
 }

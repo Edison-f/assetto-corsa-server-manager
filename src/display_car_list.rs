@@ -4,7 +4,7 @@ use std::string::String;
 use eframe::emath::Vec2;
 use egui::{Image, Ui, Widget};
 
-use crate::ServerManager;
+use crate::{Car, ServerManager};
 
 impl ServerManager {
     pub(crate) fn display_car_list(&mut self, ui: &mut egui::Ui) {
@@ -58,9 +58,15 @@ impl ServerManager {
             self.car_list.get_mut(&name).unwrap().remove(&skin);
 
         } else {
-            self.car_list.get_mut(&name).unwrap().insert(skin, *num - 1);
+            self.car_list.get_mut(&name).unwrap().insert(skin.clone(), *num - 1);
             if self.car_list.get_mut(&name).unwrap().is_empty() {
                 self.car_list.remove(&name);
+            }
+        }
+        for (i, entry) in self.entry_list.list.iter().enumerate() {
+            if entry.model == name && entry.skin == skin {
+                self.entry_list.list.remove(i);
+                break;
             }
         }
         // self.update_config_car_list(); TODO: Need to update
@@ -68,65 +74,35 @@ impl ServerManager {
 
 
     /*
-     * If entry for car name already exists
-     *      If skin exists
-     *          Increment
-     *      Else
-     *          Create and init at 1
-     * Else
-     *      Create entry for car name and skin, init at 1
-     */
-    pub(crate) fn add_car(&mut self, car_name: &String, skin_name: String) {
+        TODO: Limit the amount of cars to the number of pits available (<track name>\ui\full\ui_track.json)
+    */
+    pub(crate) fn add_car(&mut self, car_name: &String, skin_name: String, from_list: bool) {
         if let Some(entry) = self.car_list.clone().get(car_name) {
             if let Some(num) = entry.get(&skin_name) {
                 let _ = &self.car_list.get_mut(car_name).unwrap().remove(&skin_name);
-                self.car_list.get_mut(car_name).unwrap().insert(skin_name, num + 1);
+                self.car_list.get_mut(car_name).unwrap().insert(skin_name.clone(), num + 1);
             } else {
-                self.car_list.get_mut(car_name).unwrap().insert(skin_name, 1);
+                self.car_list.get_mut(car_name).unwrap().insert(skin_name.clone(), 1);
             }
         } else {
             let mut inner: HashMap<String, u8> =  Default::default();
-            inner.insert(skin_name, 1);
+            inner.insert(skin_name.clone(), 1);
             self.car_list.insert(car_name.clone(), inner);
+        }
+        if from_list {
+            self.entry_list.list.push(Car { model: String::from(car_name), skin: String::from(&skin_name.clone()), ..Default::default() });
+            for car in &self.entry_list.list {
+                println!("{:?}", car);
+            }
         }
     }
 
-    // TODO: Update to use HashMap
     pub(crate) fn update_from_config(&mut self, ui: &mut Ui) {
         for entry in &self.entry_list.list.clone() {
-            self.add_car(&entry.model, String::from(&entry.skin));
+            self.add_car(&entry.model, String::from(&entry.skin), false);
             if self.car_textures.get(&entry.model).unwrap().len() <= 1 {
-                self.discover_skins(&entry.model);
                 self.generate_skin_textures(ui, &entry.model);
             }
         }
-
-        // let regex = Regex::new(";").unwrap();
-        // let split = regex.split(&self.config.server.cars);
-        // self.car_indices = vec![];
-        // for name in split {
-        //     let finder = Regex::new(name).unwrap();
-        //     'inner: for (i, car) in self.available_car_list.iter().enumerate() {
-        //         let found = finder.find(car);
-        //         if found.is_some() {
-        //             self.car_indices.push(i);
-        //             self.car_list.insert(String::from(car), 0);
-        //             break 'inner;
-        //         }
-        //     }
-        // }
     }
-    //
-    // pub(crate) fn update_from_entry_list(&mut self) {
-    //     for car in &self.entry_list.list {
-    //         let mut index = 0;
-    //         for c in self.available_skins_list.get(&car.model).unwrap() {
-    //             if c == &car.skin {
-    //                 break;
-    //             }
-    //             index += 1;
-    //         }
-    //         self.car_list.insert(car.model.clone(), index);
-    //     }
-    // }
 }
