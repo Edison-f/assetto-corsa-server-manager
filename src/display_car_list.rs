@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::string::String;
 
 use eframe::emath::Vec2;
-use egui::{Image, Widget};
+use egui::{Image, Ui, Widget};
 
 use crate::ServerManager;
 
@@ -13,7 +13,6 @@ impl ServerManager {
             self.car_list_changed = false;
         }
         egui::ScrollArea::both().id_source("car_list_scroll").show(ui, |ui| {
-            // let indices = self.car_indices.clone();
             for (car_name, map) in &self.car_list.clone() {
                 if map.is_empty() { // remove_car should deal with this, I don't know why this is even needed
                     self.car_list.remove(car_name);
@@ -93,22 +92,30 @@ impl ServerManager {
     }
 
     // TODO: Update to use HashMap
-    // pub(crate) fn update_from_config(&mut self) {
-    //     let regex = Regex::new(";").unwrap();
-    //     let split = regex.split(&self.config.server.cars);
-    //     self.car_indices = vec![];
-    //     for name in split {
-    //         let finder = Regex::new(name).unwrap();
-    //         'inner: for (i, car) in self.available_car_list.iter().enumerate() {
-    //             let found = finder.find(car);
-    //             if found.is_some() {
-    //                 self.car_indices.push(i);
-    //                 self.car_list.insert(String::from(car), 0);
-    //                 break 'inner;
-    //             }
-    //         }
-    //     }
-    // }
+    pub(crate) fn update_from_config(&mut self, ui: &mut Ui) {
+        for entry in &self.entry_list.list.clone() {
+            self.add_car(&entry.model, String::from(&entry.skin));
+            if self.car_textures.get(&entry.model).unwrap().len() <= 1 {
+                self.discover_skins(&entry.model);
+                self.generate_skin_textures(ui, &entry.model);
+            }
+        }
+
+        // let regex = Regex::new(";").unwrap();
+        // let split = regex.split(&self.config.server.cars);
+        // self.car_indices = vec![];
+        // for name in split {
+        //     let finder = Regex::new(name).unwrap();
+        //     'inner: for (i, car) in self.available_car_list.iter().enumerate() {
+        //         let found = finder.find(car);
+        //         if found.is_some() {
+        //             self.car_indices.push(i);
+        //             self.car_list.insert(String::from(car), 0);
+        //             break 'inner;
+        //         }
+        //     }
+        // }
+    }
     //
     // pub(crate) fn update_from_entry_list(&mut self) {
     //     for car in &self.entry_list.list {

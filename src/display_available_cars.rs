@@ -103,7 +103,7 @@ impl ServerManager {
         }
     }
 
-    fn discover_skins(&self, car_name: &String) -> Vec<String> {
+    pub(crate) fn discover_skins(&self, car_name: &String) -> Vec<String> {
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\cars";
         let mut result: Vec<String> = Vec::new();
         let inner = std::fs::read_dir(format!("{}\\{}\\skins", path.clone(), car_name)).unwrap();
@@ -121,7 +121,7 @@ impl ServerManager {
         result
     }
 
-    fn generate_skin_textures(&mut self, ui: &mut egui::Ui, target_car: &String) {
+    pub(crate) fn generate_skin_textures(&mut self, ui: &mut egui::Ui, target_car: &String) {
         let path = self.assetto_corsa_path.clone().unwrap() + "\\content\\cars\\" + target_car.as_str() + "\\skins\\";
         let read_dir = std::fs::read_dir(path.clone()).unwrap();
         for entry in read_dir {

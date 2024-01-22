@@ -252,7 +252,7 @@ impl eframe::App for ServerManager {
                         ui.checkbox(&mut self.display_car_images, "Display Car Images");
                         if self.is_path_selected && ui.button("Load Config").clicked() {
                             self.parse();
-                            // self.update_from_config();
+                            self.update_from_config(ui);
                             self.is_path_selected = false;
                         }
                         let save_to_file = ui.button("Save to file");
